@@ -144,6 +144,7 @@
                 <div class="np-controls">
                     <button onclick="prevTrack()" class="np-btn">⏮</button>
                     <button onclick="togglePlayStop()" class="np-btn np-play" id="npPlayStopBtn">▶</button>
+                    <button onclick="stopSong()" class="np-btn np-stop-btn" id="npStopBtn" title="Stop">⏹</button>
                     <button onclick="nextTrack()" class="np-btn">⏭</button>
                 </div>
                 <div class="np-progress">
@@ -400,6 +401,21 @@
     </div>
 
     <script src="app.v4.js"></script>
-    <div id="versionBadge" style="position:fixed;bottom:4px;left:4px;background:#22c55e;color:#fff;padding:2px 8px;border-radius:10px;font-size:10px;z-index:99999;font-family:monospace;opacity:0.8;">v7.6-TOGGLE</div>
+
+<!-- Floating Stop Button (mobile-friendly) -->
+<button id="floatingStopBtn" onclick="stopSong()" style="display:none;position:fixed;bottom:90px;right:20px;z-index:10000;width:60px;height:60px;border-radius:50%;background:#ff4444;border:3px solid #fff;color:#fff;font-size:28px;cursor:pointer;box-shadow:0 4px 15px rgba(255,0,0,0.5);line-height:1;" title="Stop Song">⏹</button>
+<script>
+(function(){
+    var np = document.getElementById('nowPlaying');
+    var fb = document.getElementById('floatingStopBtn');
+    if(np && fb){
+        new MutationObserver(function(){
+            fb.style.display = np.style.display !== 'none' ? 'block' : 'none';
+        }).observe(np, {attributes:true, attributeFilter:['style']});
+    }
+})();
+</script>
+
+    <div id="versionBadge" style="position:fixed;bottom:4px;left:4px;background:#22c55e;color:#fff;padding:2px 8px;border-radius:10px;font-size:10px;z-index:99999;font-family:monospace;opacity:0.8;">v7.8-STOP</div>
 </body>
 </html>

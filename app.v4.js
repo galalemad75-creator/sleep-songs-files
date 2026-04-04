@@ -390,6 +390,7 @@ function stopSong() {
     audioPlayer.currentTime = 0;
     var btn = document.getElementById('npPlayStopBtn');
     if (btn) btn.textContent = '▶';
+    document.querySelectorAll('.song-card').forEach(c => c.classList.remove('playing'));
 }
 
 function playSong(index) {
@@ -419,19 +420,19 @@ function playSong(index) {
     document.getElementById('npTitle').textContent = song.title;
     document.getElementById('npChapter').textContent = currentChapter.name;
     document.getElementById('npImage').src = song.image || '';
-    document.getElementById('npPlayBtn').textContent = 'â¸';
+    document.getElementById('npPlayStopBtn').textContent = 'â¸';
     nowPlaying.style.display = 'block';
 
     trackPlay(song.id || song.title);
 }
 
-function togglePlay() {
+function togglePlayStop() {
     if (audioPlayer.paused) {
         audioPlayer.play();
-        document.getElementById('npPlayBtn').textContent = 'â¸';
+        document.getElementById('npPlayStopBtn').textContent = 'â¸';
     } else {
         audioPlayer.pause();
-        document.getElementById('npPlayBtn').textContent = 'â¶';
+        document.getElementById('npPlayStopBtn').textContent = 'â¶';
     }
 }
 

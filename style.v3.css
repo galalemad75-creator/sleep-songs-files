@@ -690,6 +690,20 @@ li {
     border: none;
     font-size: 1.2rem;
 }
+
+.np-stop-btn {
+    width: 44px;
+    height: 44px;
+    background: #ff4444;
+    border: 2px solid #ff6666;
+    color: #fff;
+    font-size: 1.1rem;
+}
+
+.np-stop-btn:hover {
+    background: #ff2222;
+    border-color: #ff4444;
+}
 }
 
     fill: #fff;
