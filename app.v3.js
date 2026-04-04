@@ -382,49 +382,11 @@ function goBack() {
 const audioPlayer = document.getElementById('audioPlayer');
 const nowPlaying = document.getElementById('nowPlaying');
 
-// ===== Volume Control =====
-let savedVolume = parseInt(localStorage.getItem('volume') || '80');
-let isMuted = localStorage.getItem('muted') === 'true';
-
-// Initialize volume
-audioPlayer.volume = isMuted ? 0 : savedVolume / 100;
-document.getElementById('volumeSlider').value = savedVolume;
-updateVolumeIcon();
-
-function setVolume(val) {
-    savedVolume = parseInt(val);
-    localStorage.setItem('volume', savedVolume);
-    if (savedVolume > 0) {
-        isMuted = false;
-        localStorage.setItem('muted', 'false');
-    }
-    audioPlayer.volume = isMuted ? 0 : savedVolume / 100;
-    updateVolumeIcon();
-}
-
-function toggleMute() {
-    isMuted = !isMuted;
-    localStorage.setItem('muted', isMuted);
-    audioPlayer.volume = isMuted ? 0 : savedVolume / 100;
-    updateVolumeIcon();
-}
-
-function updateVolumeIcon() {
-    const btn = document.getElementById('npVolBtn');
-    const slider = document.getElementById('volumeSlider');
-    const iconOn = btn.querySelector('.icon-vol-on');
-    const iconOff = btn.querySelector('.icon-vol-off');
-    if (isMuted || savedVolume === 0) {
-        if (iconOn) iconOn.style.display = 'none';
-        if (iconOff) iconOff.style.display = '';
-        slider.value = 0;
-        slider.style.background = `var(--bg-dark)`;
-    } else {
-        if (iconOn) iconOn.style.display = '';
-        if (iconOff) iconOff.style.display = 'none';
-        slider.value = savedVolume;
-        slider.style.background = `linear-gradient(to right, var(--primary) ${savedVolume}%, var(--bg-dark) ${savedVolume}%)`;
-    }
+// ===== Stop Song =====
+function stopSong() {
+    audioPlayer.pause();
+    audioPlayer.currentTime = 0;
+    document.getElementById('npPlayBtn').textContent = '▶';
 }
 
 function playSong(index) {
@@ -1676,3 +1638,5 @@ setInterval(function() {
         }
     });
 }, 2000);
+// Cache bust: 1775304619
+// Cache bust: 1775304883 - stopSong replaces mute
