@@ -2,12 +2,10 @@
 <html lang="en" dir="ltr">
 <head>
     <script>
-    // Break any redirect loop from cached old version
     if(location.search.includes('v=') && !location.search.includes('v=6')){
         sessionStorage.setItem('_rl', parseInt(sessionStorage.getItem('_rl')||'0')+1);
         if(parseInt(sessionStorage.getItem('_rl'))>2){
             sessionStorage.removeItem('_rl');
-            // Force fresh fetch
             fetch(location.pathname,{cache:'no-store'}).then(r=>r.text()).then(html=>{
                 document.open();document.write(html);document.close();
             });
@@ -18,7 +16,7 @@
     }
     </script>
 
-    <meta name="app-version" content="7.5">
+    <meta name="app-version" content="7.6">
 
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -27,11 +25,7 @@
     <meta http-equiv="Expires" content="0">
     <meta name="description" content="Sleep Songs - Interactive podcast for kids ages 4-6. Gentle lullabies and sleep songs to help your child drift off to dreamland.">
     <meta name="keywords" content="kids sleep songs, lullabies podcast, bedtime songs, children's music, sleep podcast kids">
-
-    <!-- Canonical URL -->
     <link rel="canonical" href="https://sleep-songs-site.vercel.app/">
-
-    <!-- Open Graph / Social Sharing -->
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://sleep-songs-site.vercel.app/">
     <meta property="og:title" content="🌙 Sleep Songs - Kids Sleep Songs Podcast">
@@ -41,21 +35,16 @@
     <meta property="og:image:height" content="630">
     <meta property="og:site_name" content="Sleep Songs">
     <meta property="og:locale" content="en_US">
-
-    <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:url" content="https://sleep-songs-site.vercel.app/">
     <meta name="twitter:title" content="🌙 Sleep Songs - Kids Sleep Songs Podcast">
     <meta name="twitter:description" content="A cozy podcast of gentle lullabies and sleep songs for kids ages 4-6.">
     <meta name="twitter:image" content="https://sleep-songs-site.vercel.app/og-image.png">
-
     <title>🌙 Sleep Songs - Kids Sleep Songs Podcast</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.v3.css">
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌙</text></svg>">
-
-    <!-- JSON-LD Structured Data -->
     <script type="application/ld+json">
     {
         "@context": "https://schema.org",
@@ -64,33 +53,16 @@
         "url": "https://sleep-songs-site.vercel.app/",
         "description": "A cozy podcast of gentle lullabies and sleep songs for kids ages 4-6.",
         "inLanguage": "en",
-        "audience": {
-            "@type": "PeopleAudience",
-            "suggestedMinAge": 4,
-            "suggestedMaxAge": 6
-        },
-        "publisher": {
-            "@type": "Organization",
-            "name": "Sleep Songs",
-            "url": "https://sleep-songs-site.vercel.app/"
-        }
+        "audience": { "@type": "PeopleAudience", "suggestedMinAge": 4, "suggestedMaxAge": 6 },
+        "publisher": { "@type": "Organization", "name": "Sleep Songs", "url": "https://sleep-songs-site.vercel.app/" }
     }
     </script>
-
 <style>
 .np-volume { display: none !important; }
-.np-stop-btn { display: inline-block !important; font-size: 22px; }
 </style>
-
 </head>
 <body>
-
-
-
-    <!-- Floating Stars Background -->
     <div class="stars-container" id="stars"></div>
-
-    <!-- Navigation -->
     <nav class="navbar" id="navbar">
         <div class="nav-inner">
             <a href="#home" class="logo" onclick="showHome()">
@@ -106,7 +78,6 @@
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 20V10"/><path d="M12 20V4"/><path d="M6 20v-6"/></svg>
                     <span class="nav-icon-label">Stats</span>
                 </a>
-
                 <a href="#contact" onclick="showContact()" class="nav-link nav-icon-link" id="nav-contact" title="Contact Us">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
                     <span class="nav-icon-label">Contact</span>
@@ -121,13 +92,11 @@
             <a href="#privacy" onclick="showPrivacy(); closeMobileMenu()">Privacy Policy</a>
             <a href="#terms" onclick="showTerms(); closeMobileMenu()">Terms of Use</a>
             <a href="#stats" onclick="showStats(); closeMobileMenu()">📊 Statistics</a>
-
             <a href="#contact" onclick="showContact(); closeMobileMenu()">✉️ Contact Us</a>
             <a href="#admin" onclick="showAdminLogin(); closeMobileMenu()">🔐 Admin Panel</a>
         </div>
     </nav>
 
-    <!-- Hero Section -->
     <section class="hero" id="heroSection">
         <div class="hero-content">
             <div class="moon-glow">🌙</div>
@@ -138,9 +107,7 @@
                 <span class="cloud cloud-2">☁️</span>
                 <span class="cloud cloud-3">☁️</span>
             </div>
-            <button class="hero-btn" onclick="scrollToChapters()">
-                🎵 Listen Now
-            </button>
+            <button class="hero-btn" onclick="scrollToChapters()">🎵 Listen Now</button>
         </div>
         <div class="hero-characters">
             <span class="char char-1">🧸</span>
@@ -151,28 +118,20 @@
         </div>
     </section>
 
-    <!-- Header Ad Container -->
     <div id="adContainerHeader" class="ad-container" style="display:none"></div>
 
-    <!-- Main Content -->
     <main class="main-content" id="mainContent">
-        <!-- Chapters Grid -->
         <section class="chapters-section" id="chaptersSection">
             <h2 class="section-title">
                 <span class="title-icon">📚</span>
                 Song Chapters
                 <span class="title-icon">📚</span>
             </h2>
-            <!-- Before Chapters Ad -->
             <div id="adContainerBeforeChapters" class="ad-container" style="display:none"></div>
-            <div class="chapters-grid" id="chaptersGrid">
-                <!-- Chapters loaded dynamically -->
-            </div>
-            <!-- After Chapters Ad -->
+            <div class="chapters-grid" id="chaptersGrid"></div>
             <div id="adContainerAfterChapters" class="ad-container" style="display:none"></div>
         </section>
 
-        <!-- Now Playing Bar -->
         <div class="now-playing" id="nowPlaying" style="display:none">
             <div class="now-playing-inner">
                 <div class="np-info">
@@ -184,9 +143,8 @@
                 </div>
                 <div class="np-controls">
                     <button onclick="prevTrack()" class="np-btn">⏮</button>
-                    <button onclick="togglePlay()" class="np-btn np-play" id="npPlayBtn">▶</button>
+                    <button onclick="togglePlayStop()" class="np-btn np-play" id="npPlayStopBtn">▶</button>
                     <button onclick="nextTrack()" class="np-btn">⏭</button>
-                    <button onclick="stopSong()" class="np-btn np-stop-btn" id="npStopBtn" title="Stop">⏹</button>
                 </div>
                 <div class="np-progress">
                     <span id="npCurrentTime">0:00</span>
@@ -201,7 +159,6 @@
         </div>
     </main>
 
-    <!-- About Page -->
     <section class="page-content" id="aboutPage" style="display:none">
         <div class="page-inner">
             <h1 class="page-title">🌟 About Us</h1>
@@ -219,15 +176,12 @@
                 </ul>
                 <h3>👶 Age Group</h3>
                 <p>Our site is designed specifically for children ages 4 to 6, with a bright, engaging visual interface that's easy for young kids to navigate.</p>
-                <h3>📧 Contact Us</h3>
-                <div id="aboutContact">
-                    <p>Have a question or suggestion? We'd love to hear from you.</p>
-                </div>
+                <h3>📬 Contact Us</h3>
+                <div id="aboutContact"><p>Have a question or suggestion? We'd love to hear from you.</p></div>
             </div>
         </div>
     </section>
 
-    <!-- Privacy Policy Page -->
     <section class="page-content" id="privacyPage" style="display:none">
         <div class="page-inner">
             <h1 class="page-title">🔒 Privacy Policy</h1>
@@ -235,24 +189,14 @@
                 <p class="update-date">Last updated: April 2026</p>
                 <h3>1. Information We Collect</h3>
                 <p>At Sleep Songs, we respect your privacy and the privacy of your children. We collect the following information:</p>
-                <ul>
-                    <li>Basic usage data (pages visited, listening duration)</li>
-                    <li>Cookies to improve your experience</li>
-                </ul>
+                <ul><li>Basic usage data (pages visited, listening duration)</li><li>Cookies to improve your experience</li></ul>
                 <h3>2. How We Use Your Information</h3>
-                <ul>
-                    <li>Improving our content and services</li>
-                    <li>Analyzing site usage to enhance the experience</li>
-                    <li>Displaying relevant ads via Google AdSense</li>
-                </ul>
+                <ul><li>Improving our content and services</li><li>Analyzing site usage to enhance the experience</li><li>Displaying relevant ads via Google AdSense</li></ul>
                 <h3>3. Cookies</h3>
                 <p>We use cookies to improve your experience on our site. You can control cookies through your browser settings.</p>
                 <h3>4. Google AdSense</h3>
                 <p>Our site uses Google AdSense to display ads. Google may use cookies to serve ads based on your prior visits to our site or other websites.</p>
-                <ul>
-                    <li>Google uses the DART cookie to serve ads based on your visits</li>
-                    <li>You can opt out of the DART cookie by visiting <a href="https://policies.google.com/privacy" target="_blank">Google's Privacy Policy</a></li>
-                </ul>
+                <ul><li>Google uses the DART cookie to serve ads based on your visits</li><li>You can opt out of the DART cookie by visiting <a href="https://policies.google.com/privacy" target="_blank">Google's Privacy Policy</a></li></ul>
                 <h3>5. Children's Privacy</h3>
                 <p>We take children's privacy seriously. Our site is designed to be safe and appropriate for children, and we do not knowingly collect personal information from children without parental consent.</p>
                 <h3>6. Security</h3>
@@ -265,7 +209,6 @@
         </div>
     </section>
 
-    <!-- Terms of Use Page -->
     <section class="page-content" id="termsPage" style="display:none">
         <div class="page-inner">
             <h1 class="page-title">📋 Terms of Use</h1>
@@ -274,19 +217,11 @@
                 <h3>1. Acceptance of Terms</h3>
                 <p>By using Sleep Songs, you agree to these terms and conditions. If you do not agree with any of these terms, please do not use the site.</p>
                 <h3>2. Permitted Use</h3>
-                <ul>
-                    <li>The site may be used for personal, non-commercial listening</li>
-                    <li>Redistribution or sale of site content is prohibited</li>
-                    <li>Commercial use of content without written permission is prohibited</li>
-                </ul>
+                <ul><li>The site may be used for personal, non-commercial listening</li><li>Redistribution or sale of site content is prohibited</li><li>Commercial use of content without written permission is prohibited</li></ul>
                 <h3>3. Intellectual Property</h3>
                 <p>All content on this site, including songs, music, images, and text, is protected by intellectual property laws.</p>
                 <h3>4. Disclaimer</h3>
-                <ul>
-                    <li>Content is provided "as is" without any warranties</li>
-                    <li>We do not guarantee the site will be available without interruption</li>
-                    <li>We are not liable for any damages arising from use of the site</li>
-                </ul>
+                <ul><li>Content is provided "as is" without any warranties</li><li>We do not guarantee the site will be available without interruption</li><li>We are not liable for any damages arising from use of the site</li></ul>
                 <h3>5. User-Submitted Content</h3>
                 <p>Any content you submit through the site is considered non-confidential and non-proprietary. We reserve the right to use, modify, or delete any content as we see fit.</p>
                 <h3>6. External Links</h3>
@@ -301,58 +236,43 @@
         </div>
     </section>
 
-    <!-- Contact Us Page -->
     <section class="page-content" id="contactPage" style="display:none">
         <div class="page-inner">
             <h1 class="page-title">✉️ Contact Us</h1>
             <div class="page-body">
                 <div class="about-hero-icon">💌</div>
                 <p>We'd love to hear from you! Reach out through any of the channels below:</p>
-                <div id="contactLinksPage" class="contact-links-grid">
-                    <!-- Loaded dynamically -->
-                </div>
+                <div id="contactLinksPage" class="contact-links-grid"></div>
             </div>
         </div>
     </section>
 
-    <!-- Stats Page -->
     <section class="page-content" id="statsPage" style="display:none">
         <div class="page-inner">
             <h1 class="page-title">📊 Statistics</h1>
             <div class="page-body">
-                <div class="stats-grid" id="statsContent">
-                    <!-- Loaded dynamically -->
-                </div>
+                <div class="stats-grid" id="statsContent"></div>
             </div>
         </div>
     </section>
 
-
-    <!-- Sound Settings Page -->
     <section class="page-content" id="soundSettingsPage" style="display:none">
         <div class="page-inner">
             <h1 class="page-title">🔊 Sound Settings</h1>
             <div class="page-body">
                 <div class="sound-settings-container">
-                    <button class="btn btn-primary btn-block" onclick="document.getElementById('audioFileInput').click()">
-                        📤 Upload audio files
-                    </button>
+                    <button class="btn btn-primary btn-block" onclick="document.getElementById('audioFileInput').click()">📤 Upload audio files</button>
                     <input type="file" id="audioFileInput" accept="audio/*" multiple style="display:none" onchange="handleAudioUpload(event)">
                     <div class="audio-list-box">
                         <div class="audio-list-header">Audio files list will appear here</div>
-                        <div id="audioFilesList" class="audio-files-list">
-                            <div class="empty-list-msg">No audio files uploaded yet</div>
-                        </div>
+                        <div id="audioFilesList" class="audio-files-list"><div class="empty-list-msg">No audio files uploaded yet</div></div>
                     </div>
-                    <button class="btn btn-danger btn-block" onclick="clearAllAudioData()">
-                        🗑️ Clear All Data
-                    </button>
+                    <button class="btn btn-danger btn-block" onclick="clearAllAudioData()">🗑️ Clear All Data</button>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- Admin Login -->
     <section class="page-content" id="adminLoginPage" style="display:none">
         <div class="page-inner">
             <div class="admin-login-box">
@@ -360,9 +280,7 @@
                 <h2>Admin Login</h2>
                 <p class="admin-subtitle">Enter your password to access the dashboard</p>
                 <form onsubmit="adminLogin(event)">
-                    <div class="form-group">
-                        <input type="password" id="adminPassword" placeholder="Password" class="form-input" required autocomplete="off">
-                    </div>
+                    <div class="form-group"><input type="password" id="adminPassword" placeholder="Password" class="form-input" required autocomplete="off"></div>
                     <button type="submit" class="btn btn-primary btn-full">Login</button>
                 </form>
                 <a href="#forgot-password" onclick="showForgotPassword()" class="forgot-link">Forgot password?</a>
@@ -371,7 +289,6 @@
         </div>
     </section>
 
-    <!-- Forgot Password -->
     <section class="page-content" id="forgotPasswordPage" style="display:none">
         <div class="page-inner">
             <div class="admin-login-box">
@@ -379,9 +296,7 @@
                 <h2>Reset Password</h2>
                 <p class="admin-subtitle">Enter your recovery key</p>
                 <form onsubmit="recoverPassword(event)">
-                    <div class="form-group">
-                        <input type="password" id="recoveryKey" placeholder="Recovery Key" class="form-input" required autocomplete="off">
-                    </div>
+                    <div class="form-group"><input type="password" id="recoveryKey" placeholder="Recovery Key" class="form-input" required autocomplete="off"></div>
                     <button type="submit" class="btn btn-primary btn-full">Verify</button>
                 </form>
                 <div id="recoveryResult" style="display:none" class="recovery-result"></div>
@@ -390,7 +305,6 @@
         </div>
     </section>
 
-    <!-- Admin Panel -->
     <section class="page-content" id="adminPanel" style="display:none">
         <div class="admin-panel">
             <div class="admin-header">
@@ -401,329 +315,91 @@
                     <button onclick="adminLogout()" class="btn btn-sm btn-danger">Logout</button>
                 </div>
             </div>
-
-            <!-- Stats -->
             <div class="admin-stats">
-                <div class="stat-card">
-                    <span class="stat-number" id="totalChapters">0</span>
-                    <span class="stat-label">Chapters</span>
-                </div>
-                <div class="stat-card">
-                    <span class="stat-number" id="totalSongs">0</span>
-                    <span class="stat-label">Songs</span>
-                </div>
-                <div class="stat-card">
-                    <span class="stat-number" id="totalPlays">0</span>
-                    <span class="stat-label">Total Plays</span>
-                </div>
+                <div class="stat-card"><span class="stat-number" id="totalChapters">0</span><span class="stat-label">Chapters</span></div>
+                <div class="stat-card"><span class="stat-number" id="totalSongs">0</span><span class="stat-label">Songs</span></div>
+                <div class="stat-card"><span class="stat-number" id="totalPlays">0</span><span class="stat-label">Total Plays</span></div>
             </div>
-
-            <!-- Chapters Management -->
             <div class="admin-section">
                 <h3>📚 Manage Chapters</h3>
-                <div class="chapters-list" id="adminChaptersList">
-                    <!-- Loaded dynamically -->
-                </div>
+                <div class="chapters-list" id="adminChaptersList"></div>
             </div>
-
-            <!-- Add/Edit Song Form -->
             <div class="admin-section" id="songFormSection" style="display:none">
                 <h3 id="songFormTitle">➕ Add New Song</h3>
                 <form onsubmit="saveSong(event)" id="songForm">
-                    <input type="hidden" id="songId">
-                    <input type="hidden" id="songChapterId">
-                    <div class="form-group">
-                        <label>Song Title</label>
-                        <input type="text" id="songTitle" class="form-input" required placeholder="Enter song title">
-                    </div>
+                    <input type="hidden" id="songId"><input type="hidden" id="songChapterId">
+                    <div class="form-group"><label>Song Title</label><input type="text" id="songTitle" class="form-input" required placeholder="Enter song title"></div>
                     <div class="form-row">
-                        <div class="form-group">
-                            <label>🎵 Audio File (MP3)</label>
-                            <input type="file" id="songAudio" accept="audio/*" class="form-input-file">
-                            <small id="currentAudio" class="form-hint"></small>
-                        </div>
-                        <div class="form-group">
-                            <label>🖼️ Cover Image</label>
-                            <input type="file" id="songImage" accept="image/*" class="form-input-file">
-                            <small id="currentImage" class="form-hint"></small>
-                        </div>
+                        <div class="form-group"><label>🎵 Audio File (MP3)</label><input type="file" id="songAudio" accept="audio/*" class="form-input-file"><small id="currentAudio" class="form-hint"></small></div>
+                        <div class="form-group"><label>🖼️ Cover Image</label><input type="file" id="songImage" accept="image/*" class="form-input-file"><small id="currentImage" class="form-hint"></small></div>
                     </div>
-                    <div class="form-group">
-                        <label>🔗 Or paste URL directly</label>
-                        <input type="url" id="songAudioUrl" class="form-input" placeholder="https://... direct MP3 link (optional)">
-                    </div>
-                    <div class="form-actions">
-                        <button type="submit" class="btn btn-primary">💾 Save</button>
-                        <button type="button" onclick="cancelSongForm()" class="btn btn-secondary">Cancel</button>
-                    </div>
+                    <div class="form-group"><label>🔗 Or paste URL directly</label><input type="url" id="songAudioUrl" class="form-input" placeholder="https://... direct MP3 link (optional)"></div>
+                    <div class="form-actions"><button type="submit" class="btn btn-primary">💾 Save</button><button type="button" onclick="cancelSongForm()" class="btn btn-secondary">Cancel</button></div>
                 </form>
             </div>
-
-            <!-- Ad Management -->
             <div class="admin-section" id="adManagementSection">
                 <h3>📢 Ad Management (Google AdSense & Others)</h3>
-                <p class="admin-hint">Paste your ad code (Google AdSense, Media.net, or any HTML/JS ad code) into the appropriate position. Codes will be injected into the live site automatically.</p>
-
-                <div class="ad-position-card">
-                    <div class="ad-position-header">
-                        <div class="ad-position-info">
-                            <span class="ad-position-icon">🔝</span>
-                            <div>
-                                <strong>Header Ad</strong>
-                                <small>Appears below the navigation bar</small>
-                            </div>
-                        </div>
-                        <label class="toggle-switch">
-                            <input type="checkbox" id="adHeaderEnabled" onchange="saveAdSettings()">
-                            <span class="toggle-slider"></span>
-                        </label>
-                    </div>
-                    <textarea id="adHeaderCode" class="form-textarea ad-code-input" placeholder="<!-- Paste your ad code here -->&#10;<script async src=&quot;https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js&quot;></script>&#10;..." rows="4" oninput="saveAdSettings()"></textarea>
-                </div>
-
-                <div class="ad-position-card">
-                    <div class="ad-position-header">
-                        <div class="ad-position-info">
-                            <span class="ad-position-icon">📖</span>
-                            <div>
-                                <strong>Before Chapters Ad</strong>
-                                <small>Appears above the chapters grid</small>
-                            </div>
-                        </div>
-                        <label class="toggle-switch">
-                            <input type="checkbox" id="adBeforeChaptersEnabled" onchange="saveAdSettings()">
-                            <span class="toggle-slider"></span>
-                        </label>
-                    </div>
-                    <textarea id="adBeforeChaptersCode" class="form-textarea ad-code-input" placeholder="<!-- Paste your ad code here -->" rows="4" oninput="saveAdSettings()"></textarea>
-                </div>
-
-                <div class="ad-position-card">
-                    <div class="ad-position-header">
-                        <div class="ad-position-info">
-                            <span class="ad-position-icon">🔀</span>
-                            <div>
-                                <strong>Between Chapters Ad</strong>
-                                <small>Appears in the middle of the chapters grid</small>
-                            </div>
-                        </div>
-                        <label class="toggle-switch">
-                            <input type="checkbox" id="adMiddleEnabled" onchange="saveAdSettings()">
-                            <span class="toggle-slider"></span>
-                        </label>
-                    </div>
-                    <textarea id="adMiddleCode" class="form-textarea ad-code-input" placeholder="<!-- Paste your ad code here -->" rows="4" oninput="saveAdSettings()"></textarea>
-                </div>
-
-                <div class="ad-position-card">
-                    <div class="ad-position-header">
-                        <div class="ad-position-info">
-                            <span class="ad-position-icon">🔚</span>
-                            <div>
-                                <strong>After Chapters Ad</strong>
-                                <small>Appears below the chapters grid</small>
-                            </div>
-                        </div>
-                        <label class="toggle-switch">
-                            <input type="checkbox" id="adAfterChaptersEnabled" onchange="saveAdSettings()">
-                            <span class="toggle-slider"></span>
-                        </label>
-                    </div>
-                    <textarea id="adAfterChaptersCode" class="form-textarea ad-code-input" placeholder="<!-- Paste your ad code here -->" rows="4" oninput="saveAdSettings()"></textarea>
-                </div>
-
-                <div class="ad-position-card">
-                    <div class="ad-position-header">
-                        <div class="ad-position-info">
-                            <span class="ad-position-icon">🦶</span>
-                            <div>
-                                <strong>Footer Ad</strong>
-                                <small>Appears above the footer</small>
-                            </div>
-                        </div>
-                        <label class="toggle-switch">
-                            <input type="checkbox" id="adFooterEnabled" onchange="saveAdSettings()">
-                            <span class="toggle-slider"></span>
-                        </label>
-                    </div>
-                    <textarea id="adFooterCode" class="form-textarea ad-code-input" placeholder="<!-- Paste your ad code here -->" rows="4" oninput="saveAdSettings()"></textarea>
-                </div>
-
-                <div class="ad-position-card">
-                    <div class="ad-position-header">
-                        <div class="ad-position-info">
-                            <span class="ad-position-icon">📜</span>
-                            <div>
-                                <strong>Global Head Script</strong>
-                                <small>Injected into &lt;head&gt; — for ad platform scripts (e.g., AdSense auto ads)</small>
-                            </div>
-                        </div>
-                        <label class="toggle-switch">
-                            <input type="checkbox" id="adGlobalEnabled" onchange="saveAdSettings()">
-                            <span class="toggle-slider"></span>
-                        </label>
-                    </div>
-                    <textarea id="adGlobalCode" class="form-textarea ad-code-input" placeholder="<!-- Paste global script tags here -->&#10;<script async src=&quot;https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js&quot;></script>" rows="4" oninput="saveAdSettings()"></textarea>
-                </div>
-
-                <div class="form-actions" style="margin-top:15px">
-                    <button onclick="clearAllAds()" class="btn btn-danger">🗑️ Clear All Ads</button>
-                    <button onclick="previewAds()" class="btn btn-secondary">👁️ Preview on Site</button>
-                </div>
+                <p class="admin-hint">Paste your ad code into the appropriate position. Codes will be injected into the live site automatically.</p>
+                <div class="ad-position-card"><div class="ad-position-header"><div class="ad-position-info"><span class="ad-position-icon">🔝</span><div><strong>Header Ad</strong><small>Appears below the navigation bar</small></div></div><label class="toggle-switch"><input type="checkbox" id="adHeaderEnabled" onchange="saveAdSettings()"><span class="toggle-slider"></span></label></div><textarea id="adHeaderCode" class="form-textarea ad-code-input" placeholder="<!-- Paste your ad code here -->" rows="4" oninput="saveAdSettings()"></textarea></div>
+                <div class="ad-position-card"><div class="ad-position-header"><div class="ad-position-info"><span class="ad-position-icon">📖</span><div><strong>Before Chapters Ad</strong><small>Appears above the chapters grid</small></div></div><label class="toggle-switch"><input type="checkbox" id="adBeforeChaptersEnabled" onchange="saveAdSettings()"><span class="toggle-slider"></span></label></div><textarea id="adBeforeChaptersCode" class="form-textarea ad-code-input" placeholder="<!-- Paste your ad code here -->" rows="4" oninput="saveAdSettings()"></textarea></div>
+                <div class="ad-position-card"><div class="ad-position-header"><div class="ad-position-info"><span class="ad-position-icon">🔄</span><div><strong>Between Chapters Ad</strong><small>Appears in the middle of the chapters grid</small></div></div><label class="toggle-switch"><input type="checkbox" id="adMiddleEnabled" onchange="saveAdSettings()"><span class="toggle-slider"></span></label></div><textarea id="adMiddleCode" class="form-textarea ad-code-input" placeholder="<!-- Paste your ad code here -->" rows="4" oninput="saveAdSettings()"></textarea></div>
+                <div class="ad-position-card"><div class="ad-position-header"><div class="ad-position-info"><span class="ad-position-icon">🔚</span><div><strong>After Chapters Ad</strong><small>Appears below the chapters grid</small></div></div><label class="toggle-switch"><input type="checkbox" id="adAfterChaptersEnabled" onchange="saveAdSettings()"><span class="toggle-slider"></span></label></div><textarea id="adAfterChaptersCode" class="form-textarea ad-code-input" placeholder="<!-- Paste your ad code here -->" rows="4" oninput="saveAdSettings()"></textarea></div>
+                <div class="ad-position-card"><div class="ad-position-header"><div class="ad-position-info"><span class="ad-position-icon">🦶</span><div><strong>Footer Ad</strong><small>Appears above the footer</small></div></div><label class="toggle-switch"><input type="checkbox" id="adFooterEnabled" onchange="saveAdSettings()"><span class="toggle-slider"></span></label></div><textarea id="adFooterCode" class="form-textarea ad-code-input" placeholder="<!-- Paste your ad code here -->" rows="4" oninput="saveAdSettings()"></textarea></div>
+                <div class="ad-position-card"><div class="ad-position-header"><div class="ad-position-info"><span class="ad-position-icon">📜</span><div><strong>Global Head Script</strong><small>Injected into &lt;head&gt;</small></div></div><label class="toggle-switch"><input type="checkbox" id="adGlobalEnabled" onchange="saveAdSettings()"><span class="toggle-slider"></span></label></div><textarea id="adGlobalCode" class="form-textarea ad-code-input" placeholder="<!-- Paste global script tags here -->" rows="4" oninput="saveAdSettings()"></textarea></div>
+                <div class="form-actions" style="margin-top:15px"><button onclick="clearAllAds()" class="btn btn-danger">🗑️ Clear All Ads</button><button onclick="previewAds()" class="btn btn-secondary">👁️ Preview on Site</button></div>
             </div>
-
-            <!-- Contact Management -->
             <div class="admin-section" id="contactManagementSection">
-                <h3>📧 Contact & Social Links</h3>
-                <p class="admin-hint">Add your contact info and social media links. They'll appear on the site automatically.</p>
-                <div class="form-group">
-                    <label>📧 Email</label>
-                    <input type="email" id="contactEmail" class="form-input" placeholder="example@gmail.com">
-                </div>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label>▶️ YouTube</label>
-                        <input type="url" id="contactYoutube" class="form-input" placeholder="https://youtube.com/@channel">
-                    </div>
-                    <div class="form-group">
-                        <label>🎵 Spotify</label>
-                        <input type="url" id="contactSpotify" class="form-input" placeholder="https://open.spotify.com/artist/...">
-                    </div>
-                </div>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label>📷 Instagram</label>
-                        <input type="url" id="contactInstagram" class="form-input" placeholder="https://instagram.com/username">
-                    </div>
-                    <div class="form-group">
-                        <label>🐦 Twitter</label>
-                        <input type="url" id="contactTwitter" class="form-input" placeholder="https://twitter.com/username">
-                    </div>
-                </div>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label>👥 Facebook</label>
-                        <input type="url" id="contactFacebook" class="form-input" placeholder="https://facebook.com/page">
-                    </div>
-                    <div class="form-group">
-                        <label>🎶 TikTok</label>
-                        <input type="url" id="contactTiktok" class="form-input" placeholder="https://tiktok.com/@username">
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label>🌐 Website</label>
-                    <input type="url" id="contactWebsite" class="form-input" placeholder="https://yourwebsite.com">
-                </div>
-                <div class="form-group">
-                    <label>💬 Custom Message (shown on About page)</label>
-                    <textarea id="contactMessage" class="form-textarea" rows="2" placeholder="Feel free to reach out anytime!"></textarea>
-                </div>
-                <div class="form-actions">
-                    <button onclick="saveContactInfo()" class="btn btn-primary">💾 Save Contact Info</button>
-                </div>
+                <h3>📬 Contact & Social Links</h3>
+                <p class="admin-hint">Add your contact info and social media links.</p>
+                <div class="form-group"><label>📧 Email</label><input type="email" id="contactEmail" class="form-input" placeholder="example@gmail.com"></div>
+                <div class="form-row"><div class="form-group"><label>▶️ YouTube</label><input type="url" id="contactYoutube" class="form-input" placeholder="https://youtube.com/@channel"></div><div class="form-group"><label>🎵 Spotify</label><input type="url" id="contactSpotify" class="form-input" placeholder="https://open.spotify.com/artist/..."></div></div>
+                <div class="form-row"><div class="form-group"><label>📷 Instagram</label><input type="url" id="contactInstagram" class="form-input" placeholder="https://instagram.com/username"></div><div class="form-group"><label>🐦 Twitter</label><input type="url" id="contactTwitter" class="form-input" placeholder="https://twitter.com/username"></div></div>
+                <div class="form-row"><div class="form-group"><label>👥 Facebook</label><input type="url" id="contactFacebook" class="form-input" placeholder="https://facebook.com/page"></div><div class="form-group"><label>🎶 TikTok</label><input type="url" id="contactTiktok" class="form-input" placeholder="https://tiktok.com/@username"></div></div>
+                <div class="form-group"><label>🌐 Website</label><input type="url" id="contactWebsite" class="form-input" placeholder="https://yourwebsite.com"></div>
+                <div class="form-group"><label>💬 Custom Message</label><textarea id="contactMessage" class="form-textarea" rows="2" placeholder="Feel free to reach out anytime!"></textarea></div>
+                <div class="form-actions"><button onclick="saveContactInfo()" class="btn btn-primary">💾 Save Contact Info</button></div>
             </div>
-
-            <!-- Change Password -->
             <div class="admin-section" id="changePasswordSection" style="display:none">
                 <h3>🔑 Change Password</h3>
                 <form onsubmit="changePassword(event)">
-                    <div class="form-group">
-                        <label>Current Password</label>
-                        <input type="password" id="currentPassword" class="form-input" required>
-                    </div>
-                    <div class="form-group">
-                        <label>New Password</label>
-                        <input type="password" id="newPassword" class="form-input" required minlength="6">
-                    </div>
-                    <div class="form-group">
-                        <label>Confirm New Password</label>
-                        <input type="password" id="confirmNewPassword" class="form-input" required>
-                    </div>
-                    <div class="form-actions">
-                        <button type="submit" class="btn btn-primary">Update</button>
-                        <button type="button" onclick="hideChangePassword()" class="btn btn-secondary">Cancel</button>
-                    </div>
+                    <div class="form-group"><label>Current Password</label><input type="password" id="currentPassword" class="form-input" required></div>
+                    <div class="form-group"><label>New Password</label><input type="password" id="newPassword" class="form-input" required minlength="6"></div>
+                    <div class="form-group"><label>Confirm New Password</label><input type="password" id="confirmNewPassword" class="form-input" required></div>
+                    <div class="form-actions"><button type="submit" class="btn btn-primary">Update</button><button type="button" onclick="hideChangePassword()" class="btn btn-secondary">Cancel</button></div>
                 </form>
             </div>
-
-            <!-- GitHub Settings -->
             <div class="admin-section" id="githubSettingsSection" style="display:none">
                 <h3>⚙️ GitHub Upload Settings</h3>
                 <p style="color:var(--text-muted);font-size:14px;margin-bottom:16px">Configure GitHub token to upload songs and images directly from this panel.</p>
-                <div class="form-group">
-                    <label>GitHub Personal Access Token</label>
-                    <input type="password" id="githubTokenInput" class="form-input" placeholder="ghp_xxxxxxxxxxxx">
-                </div>
-                <div class="form-group">
-                    <label>Repository (owner/repo)</label>
-                    <input type="text" id="githubRepoInput" class="form-input" placeholder="galalemad75-creator/sleep-songs-files">
-                </div>
+                <div class="form-group"><label>GitHub Personal Access Token</label><input type="password" id="githubTokenInput" class="form-input" placeholder="ghp_xxxxxxxxxxxx"></div>
+                <div class="form-group"><label>Repository (owner/repo)</label><input type="text" id="githubRepoInput" class="form-input" placeholder="galalemad75-creator/sleep-songs-files"></div>
                 <div id="githubStatus" class="github-status"></div>
-                <div class="form-actions">
-                    <button onclick="saveGithubSettings()" class="btn btn-primary">💾 Save & Verify</button>
-                    <button onclick="hideGithubSettings()" class="btn btn-secondary">Cancel</button>
-                </div>
+                <div class="form-actions"><button onclick="saveGithubSettings()" class="btn btn-primary">💾 Save & Verify</button><button onclick="hideGithubSettings()" class="btn btn-secondary">Cancel</button></div>
             </div>
         </div>
     </section>
 
-    <!-- Footer Ad Container -->
     <div id="adContainerFooter" class="ad-container" style="display:none"></div>
 
-    <!-- Footer -->
     <footer class="footer">
         <div class="footer-inner">
-            <div class="footer-brand">
-                <span class="footer-logo">🌙</span>
-                <span>Sleep Songs</span>
-            </div>
-            <div class="footer-links">
-                <a href="#about" onclick="showAbout()">About Us</a>
-                <a href="#privacy" onclick="showPrivacy()">Privacy Policy</a>
-                <a href="#terms" onclick="showTerms()">Terms of Use</a>
-            </div>
-            <div class="footer-contact">
-                <button class="btn btn-secondary btn-sm" onclick="showContact()">✉️ Contact Us</button>
-            </div>
+            <div class="footer-brand"><span class="footer-logo">🌙</span><span>Sleep Songs</span></div>
+            <div class="footer-links"><a href="#about" onclick="showAbout()">About Us</a><a href="#privacy" onclick="showPrivacy()">Privacy Policy</a><a href="#terms" onclick="showTerms()">Terms of Use</a></div>
+            <div class="footer-contact"><button class="btn btn-secondary btn-sm" onclick="showContact()">✉️ Contact Us</button></div>
             <p class="footer-copy">© 2026 Sleep Songs. All rights reserved.</p>
         </div>
     </footer>
 
-    <!-- Toast Notification -->
     <div class="toast" id="toast"></div>
 
-    <!-- Cookie Consent Banner -->
     <div id="cookieBanner" class="cookie-banner">
         <div class="cookie-inner">
             <p>🍪 We use cookies to improve your experience and show relevant ads via Google AdSense. By continuing to use this site, you agree to our <a href="#privacy" onclick="showPrivacy()">Privacy Policy</a>.</p>
-            <div class="cookie-actions">
-                <button onclick="acceptCookies()" class="btn btn-primary btn-sm">Accept</button>
-                <a href="#privacy" onclick="showPrivacy()" class="cookie-learn-more">Learn More</a>
-            </div>
+            <div class="cookie-actions"><button onclick="acceptCookies()" class="btn btn-primary btn-sm">Accept</button><a href="#privacy" onclick="showPrivacy()" class="cookie-learn-more">Learn More</a></div>
         </div>
     </div>
 
     <script src="app.v4.js"></script>
-
-    <!-- Version Indicator -->
-    <div id="versionBadge" style="position:fixed;bottom:4px;left:4px;background:#22c55e;color:#fff;padding:2px 8px;border-radius:10px;font-size:10px;z-index:99999;font-family:monospace;opacity:0.8;">v6.4-CLEAN</div>
-
-
-<script>
-// FORCE FIX: Remove mute button, add stop button
-(function(){
-    function fix() {
-        var volDiv = document.querySelector('.np-volume');
-        if (volDiv) {
-            volDiv.outerHTML = '<button onclick="var a=document.getElementById(\'audioPlayer\');if(a){a.pause();a.currentTime=0;}var p=document.getElementById(\'npPlayBtn\');if(p)p.textContent=\'▶\';}" class="np-btn np-stop-btn" id="npStopBtn" title="Stop" style="font-size:20px">⏹</button>';
-        }
-    }
-    fix();
-    var tries = 0;
-    var iv = setInterval(function(){ fix(); tries++; if(tries > 20) clearInterval(iv); }, 200);
-    document.addEventListener('DOMContentLoaded', function(){ fix(); clearInterval(iv); });
-})();
-</script>
-
+    <div id="versionBadge" style="position:fixed;bottom:4px;left:4px;background:#22c55e;color:#fff;padding:2px 8px;border-radius:10px;font-size:10px;z-index:99999;font-family:monospace;opacity:0.8;">v7.6-TOGGLE</div>
 </body>
 </html>
