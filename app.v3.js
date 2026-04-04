@@ -1,3 +1,29 @@
+// ===== DOM Fix: Replace mute button with stop button =====
+(function fixMuteButton() {
+    function apply() {
+        var volDiv = document.querySelector('.np-volume');
+        if (volDiv) {
+            var stopBtn = document.createElement('button');
+            stopBtn.className = 'np-btn np-stop-btn';
+            stopBtn.id = 'npStopBtn';
+            stopBtn.title = 'Stop';
+            stopBtn.textContent = '⏹';
+            stopBtn.onclick = function() {
+                var ap = document.getElementById('audioPlayer');
+                if (ap) { ap.pause(); ap.currentTime = 0; }
+                var pb = document.getElementById('npPlayBtn');
+                if (pb) pb.textContent = '▶';
+            };
+            volDiv.parentNode.replaceChild(stopBtn, volDiv);
+        }
+    }
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', apply);
+    } else {
+        apply();
+    }
+})();
+
 /* ===== App.js - Sleep Songs ===== */
 
 // ===== Default Chapters Data =====
@@ -1640,3 +1666,4 @@ setInterval(function() {
 }, 2000);
 // Cache bust: 1775304619
 // Cache bust: 1775304883 - stopSong replaces mute
+// v7.1 stopSong fix 1775305160
