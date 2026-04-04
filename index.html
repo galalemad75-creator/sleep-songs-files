@@ -18,7 +18,7 @@
     }
     </script>
 
-    <meta name="app-version" content="7.2">
+    <meta name="app-version" content="7.4">
 
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -694,10 +694,27 @@
         </div>
     </div>
 
-    <script src="app.v3.js"></script>
+    <script src="app.v4.js"></script>
 
     <!-- Version Indicator -->
     <div id="versionBadge" style="position:fixed;bottom:4px;left:4px;background:#22c55e;color:#fff;padding:2px 8px;border-radius:10px;font-size:10px;z-index:99999;font-family:monospace;opacity:0.8;">v6.4-CLEAN</div>
+
+
+<script>
+// FORCE FIX: Remove mute button, add stop button
+(function(){
+    function fix() {
+        var volDiv = document.querySelector('.np-volume');
+        if (volDiv) {
+            volDiv.outerHTML = '<button onclick="var a=document.getElementById(\'audioPlayer\');if(a){a.pause();a.currentTime=0;}var p=document.getElementById(\'npPlayBtn\');if(p)p.textContent=\'▶\';}" class="np-btn np-stop-btn" id="npStopBtn" title="Stop" style="font-size:20px">⏹</button>';
+        }
+    }
+    fix();
+    var tries = 0;
+    var iv = setInterval(function(){ fix(); tries++; if(tries > 20) clearInterval(iv); }, 200);
+    document.addEventListener('DOMContentLoaded', function(){ fix(); clearInterval(iv); });
+})();
+</script>
 
 </body>
 </html>
