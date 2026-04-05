@@ -1692,7 +1692,3 @@ setInterval(function() {
         }
     });
 }, 2000);
-
- - stopSong replaces mute
-
-\n// v7.6 - Play/Stop Toggle Button\n
