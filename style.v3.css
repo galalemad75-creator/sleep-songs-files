@@ -677,10 +677,6 @@ li {
     padding: 0;
 }
 
-    fill: currentColor;
-    flex-shrink: 0;
-}
-
 .np-btn:hover {
     background: var(--bg-card-hover);
     border-color: var(--primary);
@@ -706,10 +702,6 @@ li {
 .np-stop-btn:hover {
     background: #ff2222;
     border-color: #ff4444;
-}
-}
-
-    fill: #fff;
 }
 
 /* Volume Control */
@@ -1985,17 +1977,6 @@ li {
     margin: 10px 0;
     font-size: 14px;
     min-height: 24px;
-}
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    width: 100%;
-    margin-top: 4px;
-}
-
-    fill: currentColor;
 }
 
 /* ===== Sound Settings ===== */

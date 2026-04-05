@@ -264,7 +264,7 @@ function renderContactInfo() {
     if (aboutContact) {
         let html = '';
         if (contactInfo.customMessage) html += `<p>${contactInfo.customMessage}</p>`;
-        html += `<p><a href="#" onclick="showContact()">ð§ Click here to see all contact info</a></p>`;
+        html += `<p><a href="#" onclick="showContact()">📧 Click here to see all contact info</a></p>`;
         aboutContact.innerHTML = html;
     }
 
@@ -288,7 +288,7 @@ function renderChapters() {
 
     grid.innerHTML = chapters.map(ch => `
         <div class="chapter-card ${ch.isMusic ? 'music-only' : ''}" onclick="openChapter(${ch.id})">
-            <div class="chapter-number">${ch.isMusic ? 'ðµ' : ch.id}</div>
+            <div class="chapter-number">${ch.isMusic ? '🎵' : ch.id}</div>
             <div class="chapter-name">${ch.icon} ${ch.name}</div>
             <div class="chapter-count">${ch.songs.length} ${ch.isMusic ? 'piece' + (ch.songs.length !== 1 ? 's' : '') : 'song' + (ch.songs.length !== 1 ? 's' : '')}</div>
         </div>
@@ -311,22 +311,22 @@ function openChapter(chapterId) {
 
     section.innerHTML = `
         <div class="songs-view">
-            <button class="back-btn" onclick="goBack()">â Back to Chapters</button>
+            <button class="back-btn" onclick="goBack()">← Back to Chapters</button>
             <div class="songs-header">
-                <div class="chapter-number">${currentChapter.isMusic ? 'ðµ' : currentChapter.id}</div>
+                <div class="chapter-number">${currentChapter.isMusic ? '🎵' : currentChapter.id}</div>
                 <h2>${currentChapter.icon} ${currentChapter.name}</h2>
             </div>
             ${currentChapter.songs.length === 0 ? `
                 <div class="empty-state">
-                    <div class="empty-icon">ðµ</div>
+                    <div class="empty-icon">🎵</div>
                     <p>No ${currentChapter.isMusic ? 'pieces' : 'songs'} in this chapter yet</p>
                     <p style="font-size:0.9rem; margin-top:10px">${currentChapter.isMusic ? 'Pieces' : 'Songs'} will be added soon</p>
                 </div>
             ` : `
                 <div class="chapter-actions-bar">
-                    <button class="btn btn-primary btn-sm" onclick="playAllFromChapter()">â¶ Play All</button>
-                    <button class="btn btn-secondary btn-sm" onclick="shuffleAllFromChapter()">ð Shuffle All</button>
-                    <button class="btn btn-secondary btn-sm" onclick="addAllFromChapter()">ð Add All to Playlist</button>
+                    <button class="btn btn-primary btn-sm" onclick="playAllFromChapter()">▶ Play All</button>
+                    <button class="btn btn-secondary btn-sm" onclick="shuffleAllFromChapter()">🔀 Shuffle All</button>
+                    <button class="btn btn-secondary btn-sm" onclick="addAllFromChapter()">📋 Add All to Playlist</button>
                 </div>
                 <div class="songs-grid">
                     ${currentChapter.songs.map((song, idx) => {
@@ -336,19 +336,19 @@ function openChapter(chapterId) {
                         return `
                         <div class="song-card " id="song-card-${idx}">
                             <div class="song-card-click" onclick="playSong(${idx})">
-                                <img src="${song.image || 'data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect fill=%22%231A1744%22 width=%22100%22 height=%22100%22/><text x=%2250%22 y=%2260%22 text-anchor=%22middle%22 font-size=%2240%22>ðµ</text></svg>'}" 
+                                <img src="${song.image || 'data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect fill=%22%231A1744%22 width=%22100%22 height=%22100%22/><text x=%2250%22 y=%2260%22 text-anchor=%22middle%22 font-size=%2240%22>🎵</text></svg>'}" 
                                      alt="${song.title}" class="song-image" loading="lazy">
                                 <div class="song-info">
                                     <div class="song-title">${song.title}</div>
                                     <div class="song-meta">${currentChapter.name}</div>
                                 </div>
-                                <div class="song-play-icon">â¶</div>
+                                <div class="song-play-icon">▶</div>
                             </div>
                             <div class="song-card-actions">
                                 </button>
                                 <button class="like-btn ${liked ? 'liked' : ''}" data-id="${songId}"
                                         onclick="event.stopPropagation(); toggleFavorite('${songId}')">
-                                    ${liked ? 'â¤ï¸' : 'ð¤'}
+                                    ${liked ? '❤️' : '🤍'}
                                 </button>
                             </div>
                         </div>
@@ -369,9 +369,9 @@ function goBack() {
     
     section.innerHTML = `
         <h2 class="section-title">
-            <span class="title-icon">ð</span>
+            <span class="title-icon">📚</span>
             Song Chapters
-            <span class="title-icon">ð</span>
+            <span class="title-icon">📚</span>
         </h2>
         <div class="chapters-grid" id="chaptersGrid"></div>
     `;
@@ -420,7 +420,7 @@ function playSong(index) {
     document.getElementById('npTitle').textContent = song.title;
     document.getElementById('npChapter').textContent = currentChapter.name;
     document.getElementById('npImage').src = song.image || '';
-    document.getElementById('npPlayStopBtn').textContent = 'â¸';
+    document.getElementById('npPlayStopBtn').textContent = '⏸';
     nowPlaying.style.display = 'block';
 
     trackPlay(song.id || song.title);
@@ -429,10 +429,10 @@ function playSong(index) {
 function togglePlayStop() {
     if (audioPlayer.paused) {
         audioPlayer.play();
-        document.getElementById('npPlayStopBtn').textContent = 'â¸';
+        document.getElementById('npPlayStopBtn').textContent = '⏸';
     } else {
         audioPlayer.pause();
-        document.getElementById('npPlayStopBtn').textContent = 'â¶';
+        document.getElementById('npPlayStopBtn').textContent = '▶';
     }
 }
 
@@ -540,7 +540,7 @@ function toggleFavorite(songId) {
     const btn = document.querySelector(`.like-btn[data-id="${songId}"]`);
     if (btn) {
         btn.classList.toggle('liked', !!favorites[songId]);
-        btn.innerHTML = favorites[songId] ? 'â¤ï¸' : 'ð¤';
+        btn.innerHTML = favorites[songId] ? '❤️' : '🤍';
     }
     updateStats();
 }
@@ -601,7 +601,7 @@ function removeAudioFile(index) {
     audioFiles.splice(index, 1);
     localStorage.setItem('uploadedAudioFiles', JSON.stringify(audioFiles));
     renderAudioFilesList();
-    showToast('ðï¸ File removed');
+    showToast('🗑️ File removed');
 }
 
 
@@ -666,7 +666,7 @@ function renderStats() {
             </div>
             <div class="stat-card-large">
                 <span class="stat-number-big">${favCount}</span>
-                <span class="stat-label-big">â¤ï¸ Favorites</span>
+                <span class="stat-label-big">❤️ Favorites</span>
             </div>
             <div class="stat-card-large">
                 <span class="stat-number-big">${totalSongs}</span>
@@ -677,10 +677,10 @@ function renderStats() {
 
     // Top played
     if (sortedPlays.length > 0) {
-        html += `<h3 class="stats-section-title">ð Most Played</h3>
+        html += `<h3 class="stats-section-title">🏆 Most Played</h3>
         <div class="stats-list">`;
         sortedPlays.forEach(([songId, count], i) => {
-            const medal = i === 0 ? 'ð¥' : i === 1 ? 'ð¥' : i === 2 ? 'ð¥' : `${i + 1}.`;
+            const medal = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : `${i + 1}.`;
             html += `<div class="stats-list-item">
                 <span class="stats-rank">${medal}</span>
                 <span class="stats-name">${songId}</span>
@@ -693,11 +693,11 @@ function renderStats() {
     // Favorites list
     const favSongs = Object.keys(favorites);
     if (favSongs.length > 0) {
-        html += `<h3 class="stats-section-title">â¤ï¸ Favorites (${favSongs.length})</h3>
+        html += `<h3 class="stats-section-title">❤️ Favorites (${favSongs.length})</h3>
         <div class="stats-list">`;
         favSongs.forEach(songId => {
             html += `<div class="stats-list-item">
-                <span class="stats-rank">â¤ï¸</span>
+                <span class="stats-rank">❤️</span>
                 <span class="stats-name">${songId}</span>
                 <button class="btn btn-sm btn-danger" onclick="toggleFavorite('${songId}'); renderStats();">Remove</button>
             </div>`;
@@ -706,7 +706,7 @@ function renderStats() {
     }
 
     if (sortedPlays.length === 0 && favSongs.length === 0) {
-        html += `<div class="empty-state"><div class="empty-icon">ð</div><p>No data yet â start listening!</p></div>`;
+        html += `<div class="empty-state"><div class="empty-icon">📊</div><p>No data yet — start listening!</p></div>`;
     }
 
     container.innerHTML = html;
@@ -857,34 +857,34 @@ function renderAdminChapters() {
     const container = document.getElementById('adminChaptersList');
     container.innerHTML = `
         <div class="admin-chapters-add-bar">
-            <button class="btn btn-primary btn-sm" onclick="showAddChapter()">â Add New Chapter</button>
-            <button class="btn btn-secondary btn-sm" onclick="removeEmptyChapters()">ð§¹ Remove Empty</button>
+            <button class="btn btn-primary btn-sm" onclick="showAddChapter()">➕ Add New Chapter</button>
+            <button class="btn btn-secondary btn-sm" onclick="removeEmptyChapters()">🧹 Remove Empty</button>
         </div>
     ` + chapters.map(ch => `
         <div class="admin-chapter-item">
             <div class="admin-chapter-header" onclick="toggleChapterSongs(${ch.id})">
                 <div class="admin-chapter-info">
-                    <div class="admin-chapter-num">${ch.isMusic ? 'ðµ' : ch.id}</div>
+                    <div class="admin-chapter-num">${ch.isMusic ? '🎵' : ch.id}</div>
                     <span class="admin-chapter-name">${ch.icon} ${ch.name}</span>
                     <span class="admin-chapter-songs">${ch.songs.length} song${ch.songs.length !== 1 ? 's' : ''}</span>
                 </div>
                 <div class="admin-chapter-actions">
-                    <button class="btn btn-sm btn-secondary" onclick="event.stopPropagation(); showRenameChapter(${ch.id})" title="Rename">âï¸</button>
-                    <button class="btn btn-sm btn-primary" onclick="event.stopPropagation(); showAddSong(${ch.id})">â Add Song</button>
-                    <button class="btn btn-sm btn-danger" onclick="event.stopPropagation(); deleteChapter(${ch.id})" title="Delete Chapter">ðï¸</button>
+                    <button class="btn btn-sm btn-secondary" onclick="event.stopPropagation(); showRenameChapter(${ch.id})" title="Rename">✏️</button>
+                    <button class="btn btn-sm btn-primary" onclick="event.stopPropagation(); showAddSong(${ch.id})">➕ Add Song</button>
+                    <button class="btn btn-sm btn-danger" onclick="event.stopPropagation(); deleteChapter(${ch.id})" title="Delete Chapter">🗑️</button>
                 </div>
             </div>
             <div class="admin-songs-list" id="songs-${ch.id}">
                 ${ch.songs.map((song, idx) => `
                     <div class="admin-song-item">
-                        <img src="${song.image || ''}" alt="" class="admin-song-thumb" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect fill=%22%231A1744%22 width=%22100%22 height=%22100%22/><text x=%2250%22 y=%2260%22 text-anchor=%22middle%22 font-size=%2230%22>ðµ</text></svg>'">
+                        <img src="${song.image || ''}" alt="" class="admin-song-thumb" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect fill=%22%231A1744%22 width=%22100%22 height=%22100%22/><text x=%2250%22 y=%2260%22 text-anchor=%22middle%22 font-size=%2230%22>🎵</text></svg>'">
                         <div class="admin-song-details">
                             <div class="admin-song-name">${song.title}</div>
                             <div class="admin-song-meta">Plays: ${playCounts[song.id || song.title] || 0}</div>
                         </div>
                         <div class="admin-song-actions">
-                            <button class="btn btn-icon btn-secondary" onclick="showEditSong(${ch.id}, ${idx})" title="Edit">âï¸</button>
-                            <button class="btn btn-icon btn-danger" onclick="deleteSong(${ch.id}, ${idx})" title="Delete">ðï¸</button>
+                            <button class="btn btn-icon btn-secondary" onclick="showEditSong(${ch.id}, ${idx})" title="Edit">✏️</button>
+                            <button class="btn btn-icon btn-danger" onclick="deleteSong(${ch.id}, ${idx})" title="Delete">🗑️</button>
                         </div>
                     </div>
                 `).join('')}
@@ -908,7 +908,7 @@ function showAddChapter() {
         toast('A chapter with this name already exists!', 'error');
         return;
     }
-    const icon = prompt('Enter an emoji icon for this chapter:', 'ðµ') || 'ðµ';
+    const icon = prompt('Enter an emoji icon for this chapter:', '🎵') || '🎵';
     const maxId = chapters.reduce((max, c) => Math.max(max, c.id), 0);
     chapters.push({ id: maxId + 1, name: name.trim(), icon: icon.trim(), songs: [] });
     saveChaptersLocal();
@@ -958,7 +958,7 @@ function deleteChapter(chapterId) {
 // ===== Song CRUD =====
 function showAddSong(chapterId) {
     document.getElementById('songFormSection').style.display = 'block';
-    document.getElementById('songFormTitle').textContent = 'â Add New Song';
+    document.getElementById('songFormTitle').textContent = '➕ Add New Song';
     document.getElementById('songId').value = '';
     document.getElementById('songChapterId').value = chapterId;
     document.getElementById('songTitle').value = '';
@@ -975,15 +975,15 @@ function showEditSong(chapterId, songIndex) {
     const song = chapter.songs[songIndex];
 
     document.getElementById('songFormSection').style.display = 'block';
-    document.getElementById('songFormTitle').textContent = 'âï¸ Edit Song';
+    document.getElementById('songFormTitle').textContent = '✏️ Edit Song';
     document.getElementById('songId').value = songIndex;
     document.getElementById('songChapterId').value = chapterId;
     document.getElementById('songTitle').value = song.title;
     document.getElementById('songAudio').value = '';
     document.getElementById('songImage').value = '';
     document.getElementById('songAudioUrl').value = '';
-    document.getElementById('currentAudio').textContent = song.audio ? 'â Audio uploaded' : '';
-    document.getElementById('currentImage').textContent = song.image ? 'â Image uploaded' : '';
+    document.getElementById('currentAudio').textContent = song.audio ? '✅ Audio uploaded' : '';
+    document.getElementById('currentImage').textContent = song.image ? '✅ Image uploaded' : '';
     document.getElementById('songFormSection').scrollIntoView({ behavior: 'smooth' });
 }
 
@@ -1005,7 +1005,7 @@ function convertUrl(url) {
         return `/api/proxy-audio?url=${encodeURIComponent(url)}`;
     }
 
-    // Dropbox: dl=0 â dl=1 (direct download)
+    // Dropbox: dl=0 → dl=1 (direct download)
     if (url.includes('dropbox.com')) {
         return url.replace('dl=0', 'dl=1').replace('?dl=0', '?dl=1');
     }
@@ -1042,7 +1042,7 @@ async function saveSong(e) {
     // Show saving state
     const saveBtn = document.querySelector('#songForm button[type="submit"]');
     const origText = saveBtn.textContent;
-    saveBtn.textContent = 'â³ Uploading...';
+    saveBtn.textContent = '⏳ Uploading...';
     saveBtn.disabled = true;
 
     try {
@@ -1220,7 +1220,7 @@ function showGithubSettings() {
     document.getElementById('githubTokenInput').value = savedToken;
     document.getElementById('githubRepoInput').value = savedRepo;
     if (savedToken) {
-        document.getElementById('githubStatus').innerHTML = '<span style="color:#4caf50">â Token configured</span>';
+        document.getElementById('githubStatus').innerHTML = '<span style="color:#4caf50">✅ Token configured</span>';
     }
     section.scrollIntoView({ behavior: 'smooth' });
 }
@@ -1238,7 +1238,7 @@ async function saveGithubSettings() {
     if (!repoFull.includes('/')) { toast('Repo format: owner/repo-name', 'error'); return; }
 
     const [owner, repo] = repoFull.split('/');
-    statusEl.innerHTML = '<span style="color:#ffa726">â³ Verifying...</span>';
+    statusEl.innerHTML = '<span style="color:#ffa726">⏳ Verifying...</span>';
 
     try {
         // Verify token and repo access
@@ -1260,14 +1260,14 @@ async function saveGithubSettings() {
         GITHUB_CONFIG.owner = owner;
         GITHUB_CONFIG.repo = repo;
 
-        statusEl.innerHTML = '<span style="color:#4caf50">â Connected! You can now upload songs directly.</span>';
+        statusEl.innerHTML = '<span style="color:#4caf50">✅ Connected! You can now upload songs directly.</span>';
         toast('GitHub settings saved!', 'success');
 
         // Create folders if they don't exist
         await ensureGithubFolders(token, owner, repo);
 
     } catch (err) {
-        statusEl.innerHTML = `<span style="color:#f44336">â ${err.message}</span>`;
+        statusEl.innerHTML = `<span style="color:#f44336">❌ ${err.message}</span>`;
     }
 }
 
@@ -1535,7 +1535,7 @@ function clearAllAds() {
 function previewAds() {
     saveAdSettings();
     showHome();
-    toast('Ads injected â preview the site', 'success');
+    toast('Ads injected — preview the site', 'success');
 }
 
 // ===== Middle Ad in Chapters Grid =====
@@ -1569,11 +1569,11 @@ function showSoundSettings() {
     var page = document.getElementById('soundSettingsPage');
     var inner = page.querySelector('.page-inner') || page;
     inner.innerHTML = `
-        <h1 class="page-title">ð Sound Settings</h1>
+        <h1 class="page-title">🔊 Sound Settings</h1>
         <div class="page-body">
             <div class="sound-settings-container">
                 <button class="btn btn-primary btn-block" onclick="document.getElementById('audioFileInput').click()">
-                    ð¤ Upload audio files
+                    📤 Upload audio files
                 </button>
                 <input type="file" id="audioFileInput" accept="audio/*" multiple style="display:none" onchange="handleAudioUpload(event)">
                 <div class="audio-list-box">
@@ -1583,7 +1583,7 @@ function showSoundSettings() {
                     </div>
                 </div>
                 <button class="btn btn-danger btn-block" onclick="clearAllAudioData()">
-                    ðï¸ Clear All Data
+                    🗑️ Clear All Data
                 </button>
             </div>
         </div>
@@ -1606,8 +1606,8 @@ function renderAudioFilesList() {
     
     container.innerHTML = audioFiles.map((file, idx) => `
         <div class="audio-file-item">
-            <span class="audio-file-name">ðµ ${file.name}</span>
-            <button class="btn btn-sm btn-danger" onclick="removeAudioFile(${idx})">â</button>
+            <span class="audio-file-name">🎵 ${file.name}</span>
+            <button class="btn btn-sm btn-danger" onclick="removeAudioFile(${idx})">✕</button>
         </div>
     `).join('');
 }
@@ -1628,7 +1628,7 @@ function handleAudioUpload(event) {
     
     localStorage.setItem('uploadedAudioFiles', JSON.stringify(audioFiles));
     renderAudioFilesList();
-    showToast('â Audio files added!');
+    showToast('✅ Audio files added!');
     event.target.value = '';
 }
 
@@ -1643,7 +1643,7 @@ function clearAllAudioData() {
     if (confirm('Are you sure you want to clear all audio data?')) {
         localStorage.removeItem('uploadedAudioFiles');
         renderAudioFilesList();
-        showToast('ðï¸ All audio data cleared');
+        showToast('🗑️ All audio data cleared');
     }
 }
 
@@ -1658,7 +1658,7 @@ function clearAllAudioData() {
                     const cls = (node.className || '').toString();
                     const id = node.id || '';
                     // Remove Quick Sound Control dialog
-                    if (text.includes('Quick Sound') || text.includes('ð§') || 
+                    if (text.includes('Quick Sound') || text.includes('🎧') || 
                         cls.includes('quick-sound') || cls.includes('QuickSound') ||
                         id.includes('quick-sound') || id.includes('QuickSound')) {
                         console.warn('[Anti-Injection] Removed injected element:', node);
@@ -1686,7 +1686,7 @@ setInterval(function() {
     document.querySelectorAll('*').forEach(function(el) {
         var text = el.textContent || '';
         var cls = (el.className || '').toString().toLowerCase();
-        if ((text.includes('Quick Sound') || text.includes('ð§')) && el.children.length < 10) {
+        if ((text.includes('Quick Sound') || text.includes('🎧')) && el.children.length < 10) {
             console.warn('[Cleanup] Removing:', el.tagName, el.className);
             el.remove();
         }
