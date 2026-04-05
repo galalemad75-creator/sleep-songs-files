@@ -639,12 +639,8 @@ function showContact() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
-// ===== Contact Form - Google Apps Script (FREE, NO LIMITS) =====
-// Setup: See google-apps-script.js for instructions
-// 1. Go to https://script.google.com → New Project → paste google-apps-script.js code
-// 2. Deploy → New Deployment → Web App → Execute as: Me, Access: Anyone
-// 3. Copy the URL and paste it below:
-var CONTACT_SCRIPT_URL = ''; // ← PASTE YOUR GOOGLE APPS SCRIPT URL HERE
+// ===== Contact Form - Vercel API + Resend (3000 emails/month free) =====
+// API key is stored in Vercel env vars as RESEND_API_KEY
 
 function handleContactForm(e) {
     e.preventDefault();
@@ -663,37 +659,38 @@ function handleContactForm(e) {
         return;
     }
 
-    // Check if configured
-    if (!CONTACT_SCRIPT_URL) {
-        statusEl.style.display = 'block';
-        statusEl.className = 'contact-form-status error';
-        statusEl.innerHTML = '⚠️ Contact form not configured yet.<br><small>Admin: Follow instructions in google-apps-script.js</small>';
-        return;
-    }
-
     // Show loading
     btn.querySelector('.contact-submit-text').style.display = 'none';
     btn.querySelector('.contact-submit-loading').style.display = 'inline';
     btn.disabled = true;
     statusEl.style.display = 'none';
 
-    fetch(CONTACT_SCRIPT_URL, {
+    // API base URL
+    var apiBase = '';
+    if (location.hostname.includes('github.io')) {
+        apiBase = 'https://sleep-songs-site.vercel.app';
+    }
+
+    fetch(apiBase + '/api/contact', {
         method: 'POST',
-        mode: 'no-cors',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name: name, email: email, subject: subject, message: message })
     })
-    .then(function() {
-        // no-cors mode means we can't read the response, but if no error = success
-        statusEl.style.display = 'block';
-        statusEl.className = 'contact-form-status success';
-        statusEl.textContent = '✅ Message sent successfully! We\'ll get back to you soon.';
-        formEl.reset();
+    .then(function(res) { return res.json(); })
+    .then(function(data) {
+        if (data.success) {
+            statusEl.style.display = 'block';
+            statusEl.className = 'contact-form-status success';
+            statusEl.textContent = '✅ Message sent successfully! We\'ll get back to you soon.';
+            formEl.reset();
+        } else {
+            throw new Error(data.error || 'Failed to send');
+        }
     })
     .catch(function(err) {
         statusEl.style.display = 'block';
         statusEl.className = 'contact-form-status error';
-        statusEl.innerHTML = '❌ Could not send message. Please try again or email us at <a href="mailto:emadh5156@gmail.com">emadh5156@gmail.com</a>';
+        statusEl.innerHTML = '❌ ' + (err.message || 'Could not send message') + '<br><small>Or email us at <a href="mailto:emadh5156@gmail.com">emadh5156@gmail.com</a></small>';
     })
     .finally(function() {
         btn.querySelector('.contact-submit-text').style.display = 'inline';
