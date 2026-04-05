@@ -24,7 +24,7 @@
     --radius: 16px;
     --radius-sm: 10px;
     --transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    --font: 'Noto Kufi Arabic', 'Segoe UI', Tahoma, sans-serif;
+    --font: 'Nunito', 'Segoe UI', 'Apple Color Emoji', 'Segoe UI Emoji', 'Noto Color Emoji', Tahoma, sans-serif;
 }
 
 html {
@@ -462,6 +462,9 @@ li {
     font-weight: 700;
     margin-bottom: 8px;
     line-height: 1.5;
+    word-break: break-word;
+    overflow-wrap: break-word;
+    min-height: 2.5em;
 }
 
 .chapter-count {
