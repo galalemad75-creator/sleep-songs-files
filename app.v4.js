@@ -639,11 +639,8 @@ function showContact() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
-// ===== Contact Form - Formspree Integration =====
-// Step 1: Go to https://formspree.io and sign up with emadh5156@gmail.com
-// Step 2: Create a new form, copy the endpoint URL (looks like https://formspree.io/f/mblynkdo)
-// Step 3: Replace the URL below with your actual Formspree endpoint
-var FORMSPREE_ENDPOINT = 'https://formspree.io/f/xzzroddq';
+// ===== Contact Form - Formsubmit.co (No signup needed) =====
+var CONTACT_EMAIL = 'emadh5156@gmail.com';
 
 function handleContactForm(e) {
     e.preventDefault();
@@ -653,19 +650,12 @@ function handleContactForm(e) {
     var message = document.getElementById('contactMessage').value.trim();
     var statusEl = document.getElementById('contactFormStatus');
     var btn = document.getElementById('contactSubmitBtn');
+    var formEl = document.getElementById('contactForm');
 
     if (!name || !email || !message) {
         statusEl.style.display = 'block';
         statusEl.className = 'contact-form-status error';
         statusEl.textContent = '⚠️ Please fill in all required fields.';
-        return;
-    }
-
-    // Check if Formspree is configured
-    if (FORMSPREE_ENDPOINT.includes('YOUR_FORM_ID_HERE')) {
-        statusEl.style.display = 'block';
-        statusEl.className = 'contact-form-status error';
-        statusEl.innerHTML = '⚠️ Form not configured yet. Please set up Formspree first.<br><small>Admin: Go to <a href="https://formspree.io" target="_blank">formspree.io</a>, sign up, create a form, and paste the endpoint in the code.</small>';
         return;
     }
 
@@ -675,31 +665,37 @@ function handleContactForm(e) {
     btn.disabled = true;
     statusEl.style.display = 'none';
 
-    // Send via Formspree AJAX
-    fetch(FORMSPREE_ENDPOINT, {
+    // Build form data for Formsubmit.co
+    var formData = new FormData();
+    formData.append('name', name);
+    formData.append('email', email);
+    formData.append('subject', subject);
+    formData.append('message', message);
+    formData.append('_subject', 'Sleep Songs Contact: ' + subject + ' - from ' + name);
+    formData.append('_captcha', 'false');
+    formData.append('_template', 'table');
+
+    // Send via Formsubmit.co AJAX
+    fetch('https://formsubmit.co/ajax/' + CONTACT_EMAIL, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-        body: JSON.stringify({
-            name: name,
-            email: email,
-            subject: subject,
-            message: message
-        })
+        headers: { 'Accept': 'application/json' },
+        body: formData
     })
-    .then(function(res) {
-        if (res.ok) {
+    .then(function(res) { return res.json(); })
+    .then(function(data) {
+        if (data.success === 'true' || data.success === true) {
             statusEl.style.display = 'block';
             statusEl.className = 'contact-form-status success';
             statusEl.textContent = '✅ Message sent successfully! We\'ll get back to you soon.';
-            document.getElementById('contactForm').reset();
+            formEl.reset();
         } else {
-            throw new Error('Server error');
+            throw new Error(data.message || 'Failed');
         }
     })
-    .catch(function() {
+    .catch(function(err) {
         statusEl.style.display = 'block';
         statusEl.className = 'contact-form-status error';
-        statusEl.innerHTML = '❌ Could not send message. Please try again or email us at <a href="mailto:emadh5156@gmail.com">emadh5156@gmail.com</a>';
+        statusEl.innerHTML = '❌ Could not send message. Please try again or email us at <a href="mailto:' + CONTACT_EMAIL + '">' + CONTACT_EMAIL + '</a>';
     })
     .finally(function() {
         btn.querySelector('.contact-submit-text').style.display = 'inline';
