@@ -639,9 +639,12 @@ function showContact() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
-// ===== Contact Form - Vercel API Route (Resend) =====
-// Emails sent via /api/contact using Resend API (3000/month free, no limits)
-// Requires RESEND_API_KEY in Vercel Environment Variables
+// ===== Contact Form - Google Apps Script (FREE, NO LIMITS) =====
+// Setup: See google-apps-script.js for instructions
+// 1. Go to https://script.google.com → New Project → paste google-apps-script.js code
+// 2. Deploy → New Deployment → Web App → Execute as: Me, Access: Anyone
+// 3. Copy the URL and paste it below:
+var CONTACT_SCRIPT_URL = ''; // ← PASTE YOUR GOOGLE APPS SCRIPT URL HERE
 
 function handleContactForm(e) {
     e.preventDefault();
@@ -660,39 +663,37 @@ function handleContactForm(e) {
         return;
     }
 
+    // Check if configured
+    if (!CONTACT_SCRIPT_URL) {
+        statusEl.style.display = 'block';
+        statusEl.className = 'contact-form-status error';
+        statusEl.innerHTML = '⚠️ Contact form not configured yet.<br><small>Admin: Follow instructions in google-apps-script.js</small>';
+        return;
+    }
+
     // Show loading
     btn.querySelector('.contact-submit-text').style.display = 'none';
     btn.querySelector('.contact-submit-loading').style.display = 'inline';
     btn.disabled = true;
     statusEl.style.display = 'none';
 
-    // Determine API base URL
-    var apiBase = '';
-    // If on GitHub Pages, use Vercel backend
-    if (location.hostname.includes('github.io')) {
-        apiBase = 'https://sleep-songs-site.vercel.app';
-    }
-
-    fetch(apiBase + '/api/contact', {
+    fetch(CONTACT_SCRIPT_URL, {
         method: 'POST',
+        mode: 'no-cors',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name: name, email: email, subject: subject, message: message })
     })
-    .then(function(res) { return res.json(); })
-    .then(function(data) {
-        if (data.success) {
-            statusEl.style.display = 'block';
-            statusEl.className = 'contact-form-status success';
-            statusEl.textContent = '✅ Message sent successfully! We\'ll get back to you soon.';
-            formEl.reset();
-        } else {
-            throw new Error(data.error || 'Failed to send');
-        }
+    .then(function() {
+        // no-cors mode means we can't read the response, but if no error = success
+        statusEl.style.display = 'block';
+        statusEl.className = 'contact-form-status success';
+        statusEl.textContent = '✅ Message sent successfully! We\'ll get back to you soon.';
+        formEl.reset();
     })
     .catch(function(err) {
         statusEl.style.display = 'block';
         statusEl.className = 'contact-form-status error';
-        statusEl.innerHTML = '❌ ' + (err.message || 'Could not send message') + '<br><small>Or email us at <a href="mailto:emadh5156@gmail.com">emadh5156@gmail.com</a></small>';
+        statusEl.innerHTML = '❌ Could not send message. Please try again or email us at <a href="mailto:emadh5156@gmail.com">emadh5156@gmail.com</a>';
     })
     .finally(function() {
         btn.querySelector('.contact-submit-text').style.display = 'inline';
