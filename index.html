@@ -16,7 +16,7 @@
     }
     </script>
 
-    <meta name="app-version" content="7.7">
+    <meta name="app-version" content="7.8">
 
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -243,8 +243,34 @@
             <h1 class="page-title">✉️ Contact Us</h1>
             <div class="page-body">
                 <div class="about-hero-icon">💌</div>
-                <p>We'd love to hear from you! Reach out through any of the channels below:</p>
-                <div id="contactLinksPage" class="contact-links-grid"></div>
+                <p style="text-align:center;color:var(--text-secondary);margin-bottom:30px;">We'd love to hear from you! Send us a message and we'll get back to you soon.</p>
+                <form id="contactForm" onsubmit="handleContactForm(event)" class="contact-form">
+                    <div class="form-group">
+                        <label for="contactName">👤 Your Name</label>
+                        <input type="text" id="contactName" class="form-input" placeholder="Enter your name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="contactEmail">📧 Your Email</label>
+                        <input type="email" id="contactEmail" class="form-input" placeholder="your@email.com" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="contactSubject">📝 Subject</label>
+                        <input type="text" id="contactSubject" class="form-input" placeholder="What is this about?">
+                    </div>
+                    <div class="form-group">
+                        <label for="contactMessage">💬 Your Message</label>
+                        <textarea id="contactMessage" class="form-textarea" rows="5" placeholder="Write your message here..." required></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-full contact-submit-btn" id="contactSubmitBtn">
+                        <span class="contact-submit-text">🚀 Send Message</span>
+                        <span class="contact-submit-loading" style="display:none">⏳ Sending...</span>
+                    </button>
+                    <div id="contactFormStatus" class="contact-form-status" style="display:none"></div>
+                </form>
+                <div class="contact-alt-section">
+                    <p class="contact-alt-text">Or reach us directly at:</p>
+                    <a href="mailto:emadh5156@gmail.com" class="contact-email-link">📧 emadh5156@gmail.com</a>
+                </div>
             </div>
         </div>
     </section>
@@ -418,7 +444,7 @@
 })();
 </script>
 
-    <div id="versionBadge" style="position:fixed;bottom:4px;left:4px;background:#22c55e;color:#fff;padding:2px 8px;border-radius:10px;font-size:10px;z-index:99999;font-family:monospace;opacity:0.8;">v7.7</div>
+    <div id="versionBadge" style="position:fixed;bottom:4px;left:4px;background:#22c55e;color:#fff;padding:2px 8px;border-radius:10px;font-size:10px;z-index:99999;font-family:monospace;opacity:0.8;">v7.8</div>
 <script src="supabase-sync.js"></script>
 <script>
 // Error tracking - catch and log all JS errors for debugging

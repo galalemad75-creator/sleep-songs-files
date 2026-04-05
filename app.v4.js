@@ -631,35 +631,55 @@ function showContact() {
     hideAllPages();
     document.getElementById('contactPage').style.display = 'block';
     document.getElementById('nav-contact').classList.add('active');
-    renderContactLinks();
+    // Reset form state
+    var form = document.getElementById('contactForm');
+    if (form) form.reset();
+    var status = document.getElementById('contactFormStatus');
+    if (status) status.style.display = 'none';
     window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
-function renderContactLinks() {
-    const container = document.getElementById('contactLinksPage');
-    if (!container) return;
-    let html = '';
-    const links = [
-        { key: 'email', icon: '📧', label: 'Email', prefix: 'mailto:' },
-        { key: 'youtube', icon: '▶️', label: 'YouTube', prefix: '' },
-        { key: 'spotify', icon: '🎵', label: 'Spotify', prefix: '' },
-        { key: 'instagram', icon: '📷', label: 'Instagram', prefix: '' },
-        { key: 'twitter', icon: '🐦', label: 'Twitter', prefix: '' },
-        { key: 'facebook', icon: '👥', label: 'Facebook', prefix: '' },
-        { key: 'tiktok', icon: '🎶', label: 'TikTok', prefix: '' },
-        { key: 'website', icon: '🌐', label: 'Website', prefix: '' },
-    ];
-    links.forEach(l => {
-        if (contactInfo[l.key]) {
-            html += `<a href="${l.prefix}${contactInfo[l.key]}" target="${l.key === 'email' ? '_self' : '_blank'}" class="contact-card-link">
-                <span class="contact-card-icon">${l.icon}</span>
-                <span class="contact-card-label">${l.label}</span>
-            </a>`;
-        }
-    });
-    if (!html) html = '<p style="text-align:center;color:var(--text-muted)">No contact info available yet.</p>';
-    if (contactInfo.customMessage) html = `<p style="text-align:center;margin-bottom:20px;color:var(--text-secondary)">${contactInfo.customMessage}</p>` + html;
-    container.innerHTML = html;
+function handleContactForm(e) {
+    e.preventDefault();
+    var name = document.getElementById('contactName').value.trim();
+    var email = document.getElementById('contactEmail').value.trim();
+    var subject = document.getElementById('contactSubject').value.trim() || 'Message from Sleep Songs';
+    var message = document.getElementById('contactMessage').value.trim();
+    var statusEl = document.getElementById('contactFormStatus');
+    var btn = document.getElementById('contactSubmitBtn');
+
+    if (!name || !email || !message) {
+        statusEl.style.display = 'block';
+        statusEl.className = 'contact-form-status error';
+        statusEl.textContent = '⚠️ Please fill in all required fields.';
+        return;
+    }
+
+    // Show loading state
+    btn.querySelector('.contact-submit-text').style.display = 'none';
+    btn.querySelector('.contact-submit-loading').style.display = 'inline';
+    btn.disabled = true;
+
+    // Build mailto link with pre-filled data
+    var body = encodeURIComponent(
+        'Name: ' + name + '\n' +
+        'Email: ' + email + '\n' +
+        '---\n\n' + message
+    );
+    var mailtoLink = 'mailto:emadh5156@gmail.com?subject=' + encodeURIComponent(subject + ' - from ' + name) + '&body=' + body;
+
+    // Open email client
+    window.location.href = mailtoLink;
+
+    // Show success message after a brief delay
+    setTimeout(function() {
+        statusEl.style.display = 'block';
+        statusEl.className = 'contact-form-status success';
+        statusEl.innerHTML = '✅ Your email client should have opened with the message ready to send!<br><small>If it didn\'t open, email us directly at <a href="mailto:emadh5156@gmail.com">emadh5156@gmail.com</a></small>';
+        btn.querySelector('.contact-submit-text').style.display = 'inline';
+        btn.querySelector('.contact-submit-loading').style.display = 'none';
+        btn.disabled = false;
+    }, 1000);
 }
 
 function showStats() {
