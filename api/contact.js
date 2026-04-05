@@ -39,7 +39,7 @@ export default async function handler(req, res) {
             },
             body: JSON.stringify({
                 from: 'Sleep Songs Contact <onboarding@resend.dev>',
-                to: ['emadh5156@gmail.com'],
+                to: ['galalemad75@gmail.com'],
                 subject: 'Sleep Songs: ' + (subject || 'New Message') + ' - from ' + name,
                 html: `
                     <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:20px;">
