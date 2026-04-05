@@ -2,6 +2,28 @@
 
 /* ===== App.js - Sleep Songs ===== */
 
+// ===== Theme Management =====
+(function initTheme() {
+    var saved = localStorage.getItem('theme');
+    if (saved) {
+        document.documentElement.setAttribute('data-theme', saved);
+    }
+})();
+
+function toggleTheme() {
+    var current = document.documentElement.getAttribute('data-theme');
+    var next;
+    if (current === 'dark') {
+        next = 'light';
+    } else if (current === 'light') {
+        next = 'dark';
+    } else {
+        next = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'light' : 'dark';
+    }
+    document.documentElement.setAttribute('data-theme', next);
+    localStorage.setItem('theme', next);
+}
+
 // ===== Default Chapters Data =====
 const DEFAULT_CHAPTERS = [
     { id: 1, name: 'Dreamland Clouds', icon: '☁️', songs: [] },
