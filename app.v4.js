@@ -643,7 +643,7 @@ function showContact() {
 // Step 1: Go to https://formspree.io and sign up with emadh5156@gmail.com
 // Step 2: Create a new form, copy the endpoint URL (looks like https://formspree.io/f/mblynkdo)
 // Step 3: Replace the URL below with your actual Formspree endpoint
-var FORMSPREE_ENDPOINT = 'https://formspree.io/f/YOUR_FORM_ID_HERE';
+var FORMSPREE_ENDPOINT = 'https://formspree.io/f/xzzroddq';
 
 function handleContactForm(e) {
     e.preventDefault();
