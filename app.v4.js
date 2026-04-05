@@ -639,14 +639,15 @@ function showContact() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
-// ===== Contact Form - Formsubmit.co (No signup needed) =====
-var CONTACT_EMAIL = 'emadh5156@gmail.com';
+// ===== Contact Form - Vercel API Route (Resend) =====
+// Emails sent via /api/contact using Resend API (3000/month free, no limits)
+// Requires RESEND_API_KEY in Vercel Environment Variables
 
 function handleContactForm(e) {
     e.preventDefault();
     var name = document.getElementById('contactName').value.trim();
     var email = document.getElementById('contactEmail').value.trim();
-    var subject = document.getElementById('contactSubject').value.trim() || 'Message from Sleep Songs';
+    var subject = document.getElementById('contactSubject').value.trim() || '';
     var message = document.getElementById('contactMessage').value.trim();
     var statusEl = document.getElementById('contactFormStatus');
     var btn = document.getElementById('contactSubmitBtn');
@@ -659,43 +660,39 @@ function handleContactForm(e) {
         return;
     }
 
-    // Show loading state
+    // Show loading
     btn.querySelector('.contact-submit-text').style.display = 'none';
     btn.querySelector('.contact-submit-loading').style.display = 'inline';
     btn.disabled = true;
     statusEl.style.display = 'none';
 
-    // Build form data for Formsubmit.co
-    var formData = new FormData();
-    formData.append('name', name);
-    formData.append('email', email);
-    formData.append('subject', subject);
-    formData.append('message', message);
-    formData.append('_subject', 'Sleep Songs Contact: ' + subject + ' - from ' + name);
-    formData.append('_captcha', 'false');
-    formData.append('_template', 'table');
+    // Determine API base URL
+    var apiBase = '';
+    // If on GitHub Pages, use Vercel backend
+    if (location.hostname.includes('github.io')) {
+        apiBase = 'https://sleep-songs-site.vercel.app';
+    }
 
-    // Send via Formsubmit.co AJAX
-    fetch('https://formsubmit.co/ajax/' + CONTACT_EMAIL, {
+    fetch(apiBase + '/api/contact', {
         method: 'POST',
-        headers: { 'Accept': 'application/json' },
-        body: formData
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: name, email: email, subject: subject, message: message })
     })
     .then(function(res) { return res.json(); })
     .then(function(data) {
-        if (data.success === 'true' || data.success === true) {
+        if (data.success) {
             statusEl.style.display = 'block';
             statusEl.className = 'contact-form-status success';
             statusEl.textContent = '✅ Message sent successfully! We\'ll get back to you soon.';
             formEl.reset();
         } else {
-            throw new Error(data.message || 'Failed');
+            throw new Error(data.error || 'Failed to send');
         }
     })
     .catch(function(err) {
         statusEl.style.display = 'block';
         statusEl.className = 'contact-form-status error';
-        statusEl.innerHTML = '❌ Could not send message. Please try again or email us at <a href="mailto:' + CONTACT_EMAIL + '">' + CONTACT_EMAIL + '</a>';
+        statusEl.innerHTML = '❌ ' + (err.message || 'Could not send message') + '<br><small>Or email us at <a href="mailto:emadh5156@gmail.com">emadh5156@gmail.com</a></small>';
     })
     .finally(function() {
         btn.querySelector('.contact-submit-text').style.display = 'inline';
