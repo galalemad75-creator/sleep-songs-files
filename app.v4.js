@@ -639,6 +639,12 @@ function showContact() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
+// ===== Contact Form - Formspree Integration =====
+// Step 1: Go to https://formspree.io and sign up with emadh5156@gmail.com
+// Step 2: Create a new form, copy the endpoint URL (looks like https://formspree.io/f/mblynkdo)
+// Step 3: Replace the URL below with your actual Formspree endpoint
+var FORMSPREE_ENDPOINT = 'https://formspree.io/f/YOUR_FORM_ID_HERE';
+
 function handleContactForm(e) {
     e.preventDefault();
     var name = document.getElementById('contactName').value.trim();
@@ -655,31 +661,51 @@ function handleContactForm(e) {
         return;
     }
 
+    // Check if Formspree is configured
+    if (FORMSPREE_ENDPOINT.includes('YOUR_FORM_ID_HERE')) {
+        statusEl.style.display = 'block';
+        statusEl.className = 'contact-form-status error';
+        statusEl.innerHTML = '⚠️ Form not configured yet. Please set up Formspree first.<br><small>Admin: Go to <a href="https://formspree.io" target="_blank">formspree.io</a>, sign up, create a form, and paste the endpoint in the code.</small>';
+        return;
+    }
+
     // Show loading state
     btn.querySelector('.contact-submit-text').style.display = 'none';
     btn.querySelector('.contact-submit-loading').style.display = 'inline';
     btn.disabled = true;
+    statusEl.style.display = 'none';
 
-    // Build mailto link with pre-filled data
-    var body = encodeURIComponent(
-        'Name: ' + name + '\n' +
-        'Email: ' + email + '\n' +
-        '---\n\n' + message
-    );
-    var mailtoLink = 'mailto:emadh5156@gmail.com?subject=' + encodeURIComponent(subject + ' - from ' + name) + '&body=' + body;
-
-    // Open email client
-    window.location.href = mailtoLink;
-
-    // Show success message after a brief delay
-    setTimeout(function() {
+    // Send via Formspree AJAX
+    fetch(FORMSPREE_ENDPOINT, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+        body: JSON.stringify({
+            name: name,
+            email: email,
+            subject: subject,
+            message: message
+        })
+    })
+    .then(function(res) {
+        if (res.ok) {
+            statusEl.style.display = 'block';
+            statusEl.className = 'contact-form-status success';
+            statusEl.textContent = '✅ Message sent successfully! We\'ll get back to you soon.';
+            document.getElementById('contactForm').reset();
+        } else {
+            throw new Error('Server error');
+        }
+    })
+    .catch(function() {
         statusEl.style.display = 'block';
-        statusEl.className = 'contact-form-status success';
-        statusEl.innerHTML = '✅ Your email client should have opened with the message ready to send!<br><small>If it didn\'t open, email us directly at <a href="mailto:emadh5156@gmail.com">emadh5156@gmail.com</a></small>';
+        statusEl.className = 'contact-form-status error';
+        statusEl.innerHTML = '❌ Could not send message. Please try again or email us at <a href="mailto:emadh5156@gmail.com">emadh5156@gmail.com</a>';
+    })
+    .finally(function() {
         btn.querySelector('.contact-submit-text').style.display = 'inline';
         btn.querySelector('.contact-submit-loading').style.display = 'none';
         btn.disabled = false;
-    }, 1000);
+    });
 }
 
 function showStats() {

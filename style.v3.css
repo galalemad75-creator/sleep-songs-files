@@ -1998,6 +1998,19 @@ li {
     color: var(--danger);
 }
 
+.contact-form-status.error a {
+    color: var(--danger);
+    font-weight: 700;
+    text-decoration: underline;
+}
+
+.contact-form-status.error small {
+    display: block;
+    margin-top: 6px;
+    opacity: 0.85;
+    font-weight: 400;
+}
+
 .contact-alt-section {
     margin-top: 35px;
     padding-top: 25px;
