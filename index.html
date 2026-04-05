@@ -400,6 +400,7 @@
         </div>
     </div>
 
+    <script src="config.js"></script>
     <script src="app.v4.js"></script>
 
 <!-- Floating Stop Button (mobile-friendly) -->
@@ -416,8 +417,16 @@
 })();
 </script>
 
-    <div id="versionBadge" style="position:fixed;bottom:4px;left:4px;background:#22c55e;color:#fff;padding:2px 8px;border-radius:10px;font-size:10px;z-index:99999;font-family:monospace;opacity:0.8;">v7.8-STOP</div>
-<script src="config.js"></script>
+    <div id="versionBadge" style="position:fixed;bottom:4px;left:4px;background:#22c55e;color:#fff;padding:2px 8px;border-radius:10px;font-size:10px;z-index:99999;font-family:monospace;opacity:0.8;">v7.9-FIXED</div>
 <script src="supabase-sync.js"></script>
+<script>
+// Error tracking - catch and log all JS errors for debugging
+window.onerror = function(msg, src, line, col, err) {
+    console.error('[SleepSongs Error]', msg, 'at', src, 'line', line);
+    var badge = document.getElementById('versionBadge');
+    if (badge) { badge.style.background = '#ef4444'; badge.textContent = 'ERR L' + line; }
+    return false;
+};
+</script>
 </body>
 </html>

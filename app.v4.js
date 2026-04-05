@@ -1046,17 +1046,19 @@ async function saveSong(e) {
     saveBtn.disabled = true;
 
     try {
-        // Upload audio file
+        // Upload audio file (pass old URL to delete duplicates)
         if (audioFile) {
-            const audioResult = await uploadFile(audioFile);
+            const oldAudioUrl = songData.audio || '';
+            const audioResult = await uploadFile(audioFile, oldAudioUrl);
             songData.audio = audioResult.url;
         } else if (audioUrlInput) {
             songData.audio = convertUrl(audioUrlInput);
         }
 
-        // Upload image file
+        // Upload image file (pass old URL to delete duplicates)
         if (imageFile) {
-            const imgResult = await uploadFile(imageFile);
+            const oldImageUrl = songData.image || '';
+            const imgResult = await uploadFile(imageFile, oldImageUrl);
             songData.image = imgResult.url;
         }
 
@@ -1092,13 +1094,56 @@ const GITHUB_CONFIG = {
     branch: 'main'
 };
 
-async function uploadFile(file) {
+// Delete old file from GitHub (by download URL)
+async function deleteOldGithubFile(downloadUrl) {
+    if (!GITHUB_CONFIG.token || !downloadUrl) return;
+    try {
+        // Extract path from download URL: https://raw.githubusercontent.com/owner/repo/branch/path
+        const parts = downloadUrl.split('/raw.githubusercontent.com/');
+        if (parts.length < 2) return;
+        const pathParts = parts[1].split('/');
+        // skip owner, repo, branch → get the file path
+        const filePath = pathParts.slice(3).join('/');
+        if (!filePath.startsWith('audio/') && !filePath.startsWith('images/')) return;
+        // Get file SHA
+        const getRes = await fetch(`https://api.github.com/repos/${GITHUB_CONFIG.owner}/${GITHUB_CONFIG.repo}/contents/${filePath}`, {
+            headers: { "Authorization": `token ${GITHUB_CONFIG.token}`, "Accept": "application/vnd.github.v3+json" }
+        });
+        if (getRes.ok) {
+            const fileData = await getRes.json();
+            await fetch(`https://api.github.com/repos/${GITHUB_CONFIG.owner}/${GITHUB_CONFIG.repo}/contents/${filePath}`, {
+                method: "DELETE",
+                headers: { "Authorization": `token ${GITHUB_CONFIG.token}`, "Accept": "application/vnd.github.v3+json", "Content-Type": "application/json" },
+                body: JSON.stringify({ message: `Remove old: ${filePath}`, sha: fileData.sha, branch: GITHUB_CONFIG.branch })
+            });
+            console.log('[Upload] Deleted old file:', filePath);
+        }
+    } catch(e) { console.warn('[Upload] Could not delete old file:', e.message); }
+}
+
+async function uploadFile(file, oldUrl) {
     // Try GitHub first if token exists
     if (GITHUB_CONFIG.token) {
         try {
             const folder = file.type.startsWith("audio/") ? "audio" : "images";
             const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, "_");
-            const fileName = `${folder}/${Date.now()}_${safeName}`;
+            // Use consistent filename: folder/safename (no timestamp) to avoid duplicates
+            // Add short hash to handle different files with same name
+            const fileHash = await new Promise((resolve) => {
+                const reader = new FileReader();
+                reader.onload = () => {
+                    const arr = new Uint8Array(reader.result);
+                    let hash = 0;
+                    for (let i = 0; i < Math.min(arr.length, 1024); i++) hash = ((hash << 5) - hash + arr[i]) | 0;
+                    resolve(Math.abs(hash).toString(36).slice(0, 6));
+                };
+                reader.readAsArrayBuffer(file.slice(0, 1024));
+            });
+            const fileName = `${folder}/${fileHash}_${safeName}`;
+
+            // Delete old file if replacing
+            if (oldUrl) await deleteOldGithubFile(oldUrl);
+
             const base64 = await new Promise((resolve, reject) => {
                 const reader = new FileReader();
                 reader.onload = () => resolve(reader.result.split(",")[1]);
@@ -1120,6 +1165,7 @@ async function uploadFile(file) {
             });
             if (res.ok) {
                 const data = await res.json();
+                console.log('[Upload] ✅ Uploaded:', fileName);
                 return { url: data.content.download_url };
             }
         } catch(e) { console.warn("GitHub upload failed, using local storage", e); }

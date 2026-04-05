@@ -1,0 +1,15 @@
+# Ignore OS files
+.DS_Store
+Thumbs.db
+
+# Ignore editor files
+*.swp
+*.swo
+*~
+
+# Ignore node modules (if any)
+node_modules/
+
+# Ignore temp upload files
+*.tmp
+*.temp
