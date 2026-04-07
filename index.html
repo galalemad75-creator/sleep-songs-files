@@ -2,7 +2,7 @@
 <html lang="en" dir="ltr">
 <head>
     <script>
-    if(location.search.includes('v=') && !location.search.includes('v=7')){
+    if(location.search.includes('v=') && !location.search.includes('v=8')){
         sessionStorage.setItem('_rl', parseInt(sessionStorage.getItem('_rl')||'0')+1);
         if(parseInt(sessionStorage.getItem('_rl'))>2){
             sessionStorage.removeItem('_rl');
@@ -43,7 +43,7 @@
     <title>🌙 Sleep Songs - Kids Sleep Songs Podcast</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.v3.css">
+    <link rel="stylesheet" href="style.v3.css?v=3">
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌙</text></svg>">
     <script type="application/ld+json">
     {
@@ -428,7 +428,7 @@
         </div>
     </div>
 
-    <script src="app.v4.js"></script>
+    <script src="app.v4.js?v=7.10"></script>
 
 <!-- Floating Stop Button (mobile-friendly) -->
 <button id="floatingStopBtn" onclick="stopSong()" style="display:none;position:fixed;bottom:90px;right:20px;z-index:10000;width:60px;height:60px;border-radius:50%;background:#ff4444;border:3px solid #fff;color:#fff;font-size:28px;cursor:pointer;box-shadow:0 4px 15px rgba(255,0,0,0.5);line-height:1;" title="Stop Song">⏹</button>
