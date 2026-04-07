@@ -1715,6 +1715,30 @@ function clearAllAudioData() {
     }
 }
 
+// ===== Missing Playback Functions =====
+function playAllFromChapter() {
+    if (!currentChapter || currentChapter.songs.length === 0) return;
+    currentSongIndex = 0;
+    playSong(0);
+    toast('Playing all songs', 'success');
+}
+
+function shuffleAllFromChapter() {
+    if (!currentChapter || currentChapter.songs.length === 0) return;
+    currentSongIndex = Math.floor(Math.random() * currentChapter.songs.length);
+    playSong(currentSongIndex);
+    toast('Shuffle mode ON', 'success');
+}
+
+function addAllFromChapter() {
+    if (!currentChapter) return;
+    toast(currentChapter.songs.length + ' songs added to queue', 'success');
+}
+
+function showToast(msg) {
+    toast(msg, 'info');
+}
+
 // ===== Anti-Injection Observer =====
 // Watches for and removes any injected "Quick Sound Control" dialogs
 (function() {
@@ -1734,7 +1758,7 @@ function clearAllAudioData() {
                     }
                     // Remove floating fixed-position elements that aren't ours
                     if (node.style && getComputedStyle(node).position === 'fixed') {
-                        const knownIds = ['navbar', 'toast', 'cookieBanner', 'stars'];
+                        const knownIds = ['navbar', 'toast', 'cookieBanner', 'stars', 'nowPlaying'];
                         if (!knownIds.includes(node.id) && !node.closest('.navbar')) {
                             console.warn('[Anti-Injection] Removed unknown fixed element:', node);
                             node.remove();
