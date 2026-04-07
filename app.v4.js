@@ -1054,14 +1054,19 @@ function cancelSongForm() {
 function convertUrl(url) {
     if (!url) return url;
 
-    // Check if it's a Google Drive URL - route through proxy
-    const isGoogleDrive = url.includes('drive.google.com') ||
-                          url.includes('docs.google.com') ||
-                          url.includes('drive.usercontent.google.com');
-
-    if (isGoogleDrive) {
-        // Route through our proxy to fix CORS and virus scan issues
-        return `/api/proxy-audio?url=${encodeURIComponent(url)}`;
+    // ✅ FIX: Google Drive → direct download link (no proxy needed)
+    if (url.includes('drive.google.com')) {
+        // Format: https://drive.google.com/file/d/FILE_ID/view
+        const match = url.match(/\/d\/([a-zA-Z0-9_-]+)/);
+        if (match) {
+            return `https://drive.google.com/uc?export=download&id=${match[1]}`;
+        }
+        // Format: https://drive.google.com/open?id=FILE_ID
+        const params = new URLSearchParams(url.split('?')[1] || '');
+        const id = params.get('id');
+        if (id) {
+            return `https://drive.google.com/uc?export=download&id=${id}`;
+        }
     }
 
     // Dropbox: dl=0 → dl=1 (direct download)
