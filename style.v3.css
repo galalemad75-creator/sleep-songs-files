@@ -773,36 +773,48 @@ li {
     bottom: 0;
     left: 0;
     right: 0;
-    z-index: 999;
-    background: var(--np-bg);
-    backdrop-filter: blur(20px);
-    border-top: 1px solid var(--border);
-    box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.3);
+    z-index: 10001;
+    background: linear-gradient(180deg, rgba(26, 23, 68, 0.95) 0%, rgba(15, 12, 40, 0.99) 100%);
+    backdrop-filter: blur(24px);
+    border-top: 2px solid var(--primary);
+    box-shadow: 0 -4px 30px rgba(124, 58, 237, 0.25), 0 -2px 10px rgba(0, 0, 0, 0.3);
+    animation: slideUpBar 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes slideUpBar {
+    from { transform: translateY(100%); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+
+[data-theme="dark"] .now-playing {
+    background: linear-gradient(180deg, rgba(10, 8, 22, 0.97) 0%, rgba(5, 3, 15, 0.99) 100%);
+    border-top-color: var(--primary-light);
 }
 
 .now-playing-inner {
     max-width: 1200px;
     margin: 0 auto;
-    padding: 12px 20px;
+    padding: 10px 16px;
     display: flex;
     align-items: center;
-    gap: 20px;
+    gap: 14px;
 }
 
 .np-info {
     display: flex;
     align-items: center;
     gap: 12px;
-    flex: 1;
+    flex: 1.2;
     min-width: 0;
 }
 
 .np-image {
-    width: 50px;
-    height: 50px;
+    width: 48px;
+    height: 48px;
     border-radius: 10px;
     object-fit: cover;
-    background: var(--bg-dark);
+    background: rgba(255,255,255,0.1);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
 }
 
 .np-details {
@@ -812,7 +824,8 @@ li {
 .np-title {
     display: block;
     font-weight: 700;
-    font-size: 0.95rem;
+    font-size: 0.9rem;
+    color: #fff;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -820,8 +833,8 @@ li {
 
 .np-chapter {
     display: block;
-    font-size: 0.8rem;
-    color: var(--text-muted);
+    font-size: 0.75rem;
+    color: rgba(255,255,255,0.5);
 }
 
 .np-controls {
@@ -831,46 +844,58 @@ li {
 }
 
 .np-btn {
-    width: 40px;
-    height: 40px;
-    background: var(--bg-card);
-    border: 1px solid var(--border);
+    width: 38px;
+    height: 38px;
+    background: rgba(255,255,255,0.1);
+    border: 1px solid rgba(255,255,255,0.15);
     border-radius: 50%;
-    color: var(--text-primary);
+    color: #fff;
     cursor: pointer;
     transition: var(--transition);
     display: flex;
     align-items: center;
     justify-content: center;
     padding: 0;
+    font-size: 0.9rem;
 }
 
 .np-btn:hover {
-    background: var(--bg-card-hover);
-    border-color: var(--primary);
+    background: rgba(255,255,255,0.2);
+    border-color: var(--primary-light);
+    transform: scale(1.08);
+}
+
+.np-btn:active {
+    transform: scale(0.95);
 }
 
 .np-play {
-    width: 48px;
-    height: 48px;
+    width: 46px;
+    height: 46px;
     background: linear-gradient(135deg, var(--primary), var(--secondary));
     border: none;
     font-size: 1.2rem;
     color: white;
+    box-shadow: 0 3px 12px rgba(124, 58, 237, 0.4);
+}
+
+.np-play:hover {
+    box-shadow: 0 4px 18px rgba(124, 58, 237, 0.6);
 }
 
 .np-stop-btn {
-    width: 44px;
-    height: 44px;
-    background: #ff4444;
-    border: 2px solid #ff6666;
-    color: #fff;
-    font-size: 1.1rem;
+    width: 40px;
+    height: 40px;
+    background: rgba(255, 68, 68, 0.2);
+    border: 2px solid rgba(255, 68, 68, 0.5);
+    color: #ff6666;
+    font-size: 1rem;
 }
 
 .np-stop-btn:hover {
-    background: #ff2222;
+    background: #ff4444;
     border-color: #ff4444;
+    color: #fff;
 }
 
 /* Volume Control */
@@ -920,37 +945,42 @@ li {
     display: flex;
     align-items: center;
     gap: 10px;
-    flex: 1;
+    flex: 1.5;
     font-size: 0.75rem;
-    color: var(--text-muted);
+    color: rgba(255,255,255,0.5);
 }
 
 .progress-bar {
     flex: 1;
     height: 6px;
-    background: var(--bg-dark);
+    background: rgba(255,255,255,0.12);
     border-radius: 3px;
     cursor: pointer;
     position: relative;
     overflow: hidden;
 }
 
+.progress-bar:hover {
+    height: 8px;
+}
+
 .progress-fill {
     height: 100%;
-    background: linear-gradient(90deg, var(--primary), var(--secondary));
+    background: linear-gradient(90deg, var(--primary-light), var(--secondary));
     border-radius: 3px;
     width: 0%;
-    transition: width 0.1s linear;
+    transition: width 0.15s linear;
+    box-shadow: 0 0 6px rgba(167, 139, 250, 0.4);
 }
 
 .np-close {
-    width: 36px;
-    height: 36px;
-    background: none;
-    border: 1px solid var(--border);
+    width: 34px;
+    height: 34px;
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.15);
     border-radius: 50%;
-    color: var(--text-muted);
-    font-size: 0.9rem;
+    color: rgba(255,255,255,0.5);
+    font-size: 0.85rem;
     cursor: pointer;
     transition: var(--transition);
 }
@@ -959,6 +989,24 @@ li {
     background: var(--danger);
     border-color: var(--danger);
     color: white;
+}
+
+.np-minimize {
+    width: 34px;
+    height: 34px;
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 50%;
+    color: rgba(255,255,255,0.5);
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.np-minimize:hover {
+    background: rgba(255,255,255,0.2);
+    border-color: var(--primary-light);
+    color: #fff;
 }
 
 /* ===== Page Content ===== */
@@ -1478,13 +1526,19 @@ li {
     
     .now-playing-inner {
         flex-wrap: wrap;
-        gap: 8px;
-        padding: 10px 12px;
+        gap: 6px;
+        padding: 8px 12px;
     }
     
     .np-controls {
         gap: 6px;
     }
+    
+    .np-btn { width: 36px; height: 36px; font-size: 0.85rem; }
+    .np-play { width: 42px; height: 42px; }
+    .np-stop-btn { width: 38px; height: 38px; }
+    .np-image { width: 40px; height: 40px; }
+    .np-title { font-size: 0.82rem; }
     
     .np-volume {
         display: flex;

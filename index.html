@@ -133,33 +133,36 @@
             <div id="adContainerAfterChapters" class="ad-container" style="display:none"></div>
         </section>
 
-        <div class="now-playing" id="nowPlaying" style="display:none">
-            <div class="now-playing-inner">
-                <div class="np-info">
-                    <img id="npImage" src="" alt="" class="np-image">
-                    <div class="np-details">
-                        <span class="np-title" id="npTitle">--</span>
-                        <span class="np-chapter" id="npChapter">--</span>
-                    </div>
-                </div>
-                <div class="np-controls">
-                    <button onclick="prevTrack()" class="np-btn">⏮</button>
-                    <button onclick="togglePlayStop()" class="np-btn np-play" id="npPlayStopBtn">▶</button>
-                    <button onclick="stopSong()" class="np-btn np-stop-btn" id="npStopBtn" title="Stop">⏹</button>
-                    <button onclick="nextTrack()" class="np-btn">⏭</button>
-                </div>
-                <div class="np-progress">
-                    <span id="npCurrentTime">0:00</span>
-                    <div class="progress-bar" onclick="seekAudio(event)">
-                        <div class="progress-fill" id="progressFill"></div>
-                    </div>
-                    <span id="npDuration">0:00</span>
-                </div>
-                <button onclick="closePlayer()" class="np-close">✕</button>
-            </div>
-            <audio id="audioPlayer" preload="metadata"></audio>
-        </div>
     </main>
+
+    <!-- Now Playing Bar - OUTSIDE main so it stays visible on all pages -->
+    <div class="now-playing" id="nowPlaying" style="display:none">
+        <div class="now-playing-inner">
+            <div class="np-info">
+                <img id="npImage" src="" alt="" class="np-image">
+                <div class="np-details">
+                    <span class="np-title" id="npTitle">--</span>
+                    <span class="np-chapter" id="npChapter">--</span>
+                </div>
+            </div>
+            <div class="np-controls">
+                <button onclick="prevTrack()" class="np-btn" title="Previous">⏮</button>
+                <button onclick="togglePlayStop()" class="np-btn np-play" id="npPlayStopBtn" title="Play/Pause">▶</button>
+                <button onclick="stopSong()" class="np-btn np-stop-btn" id="npStopBtn" title="Stop">⏹</button>
+                <button onclick="nextTrack()" class="np-btn" title="Next">⏭</button>
+            </div>
+            <div class="np-progress">
+                <span id="npCurrentTime">0:00</span>
+                <div class="progress-bar" onclick="seekAudio(event)">
+                    <div class="progress-fill" id="progressFill"></div>
+                </div>
+                <span id="npDuration">0:00</span>
+            </div>
+            <button onclick="togglePlayerMinimize()" class="np-minimize" title="Minimize">➖</button>
+            <button onclick="closePlayer()" class="np-close" title="Close">✕</button>
+        </div>
+        <audio id="audioPlayer" preload="metadata"></audio>
+    </div>
 
     <section class="page-content" id="aboutPage" style="display:none">
         <div class="page-inner">
