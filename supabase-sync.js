@@ -216,49 +216,81 @@
     }
   };
 
-  // ===== 6. Override loadChapters =====
-  const origLoadChapters = window.loadChapters;
+  // ===== 6. Smart loadChapters =====
+  // Logic: Supabase has data? → use it. Otherwise → let original load defaults → sync up.
   window.loadChapters = async function () {
+    let usedSupabase = false;
+
     if (supaReady) {
       try {
-        window.chapters = await DB.loadChapters();
-        // Cache in localStorage for offline/fast access
-        localStorage.setItem('chapters', JSON.stringify(window.chapters));
-        console.log('[DB] ✅ Loaded', window.chapters.length, 'chapters from Supabase');
-      } catch (e) {
-        console.warn('[DB] Supabase load failed, using cache:', e.message);
-        // Fallback to localStorage cache
-        const stored = localStorage.getItem('chapters');
-        if (stored) {
-          window.chapters = JSON.parse(stored);
+        const sbChapters = await DB.loadChapters();
+        // Only use Supabase data if it has actual songs (not all empty)
+        const hasSongs = sbChapters.some(ch => ch.songs && ch.songs.length > 0);
+        if (hasSongs) {
+          window.chapters = sbChapters;
+          localStorage.setItem('chapters', JSON.stringify(window.chapters));
+          usedSupabase = true;
+          console.log('[DB] ✅ Loaded', sbChapters.length, 'chapters with songs from Supabase');
+        } else {
+          console.log('[DB] Supabase has empty chapters, loading defaults...');
         }
-      }
-    } else {
-      // Supabase not available — use original logic
-      const stored = localStorage.getItem('chapters');
-      if (stored) {
-        window.chapters = JSON.parse(stored);
+      } catch (e) {
+        console.warn('[DB] Supabase load failed:', e.message);
       }
     }
+
+    if (!usedSupabase) {
+      // Original logic: try localStorage cache first, then defaults
+      const stored = localStorage.getItem('chapters');
+      if (stored) {
+        try {
+          window.chapters = JSON.parse(stored);
+        } catch {
+          window.chapters = [];
+        }
+      } else {
+        window.chapters = [];
+      }
+
+      // If still empty, populate from DEFAULT_SONGS (defined in app.v4.js)
+      if (window.chapters.length === 0 && typeof DEFAULT_CHAPTERS !== 'undefined') {
+        window.chapters = JSON.parse(JSON.stringify(DEFAULT_CHAPTERS));
+        if (typeof DEFAULT_SONGS !== 'undefined') {
+          window.chapters.forEach(ch => {
+            if (DEFAULT_SONGS[ch.id] && ch.songs.length === 0) {
+              ch.songs = JSON.parse(JSON.stringify(DEFAULT_SONGS[ch.id]));
+            }
+          });
+        }
+      }
+
+      localStorage.setItem('chapters', JSON.stringify(window.chapters));
+
+      // Sync defaults to Supabase for next time
+      if (supaReady && window.chapters.length > 0) {
+        console.log('[DB] Syncing default chapters to Supabase...');
+        for (const ch of window.chapters) {
+          try { await DB.saveChapter(ch); } catch {}
+        }
+        console.log('[DB] ✅ Default chapters synced');
+      }
+    }
+
     if (typeof renderChapters === 'function') renderChapters();
     if (typeof updateStats === 'function') updateStats();
   };
 
-  // ===== 7. Override saveChaptersLocal =====
-  window.saveChaptersLocal = async function () {
-    // Always save to localStorage (fast cache)
+  // ===== 7. Enhanced saveChaptersLocal (sync + async Supabase) =====
+  window.saveChaptersLocal = function () {
+    // Always save to localStorage immediately (sync - like original)
     localStorage.setItem('chapters', JSON.stringify(window.chapters));
 
-    // Sync each chapter to Supabase
-    if (supaReady) {
+    // Sync to Supabase in background (fire-and-forget)
+    if (supaReady && window.chapters) {
       for (const ch of window.chapters) {
-        try {
-          await DB.saveChapter(ch);
-        } catch (e) {
-          console.warn('[DB] Failed to save chapter', ch.id, ':', e.message);
-        }
+        DB.saveChapter(ch).catch(e => console.warn('[DB] Save chapter', ch.id, ':', e.message));
       }
-      console.log('[DB] ✅ Synced to Supabase');
+      console.log('[DB] 📤 Syncing to Supabase...');
     }
   };
 
