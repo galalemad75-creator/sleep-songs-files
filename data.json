@@ -1,0 +1,66 @@
+{
+  "version": 1,
+  "chapters": [
+    {
+      "id": 1,
+      "name": "Dreamland Clouds",
+      "icon": "☁️",
+      "songs": [
+        {
+          "id": "song_1_1",
+          "title": "Dreamland Clouds",
+          "audio": "https://raw.githubusercontent.com/galalemad75-creator/sleep-songs-files/main/audio/yeuemh_Dreamland_Clouds__1_.mp3",
+          "image": "https://raw.githubusercontent.com/galalemad75-creator/sleep-songs-files/main/images/ig15y3_Copilot_20260405_192843.png"
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "name": "Moonlit Dreams",
+      "icon": "🌙",
+      "songs": [
+        {
+          "id": "song_2_1",
+          "title": "Moonlit Dreams",
+          "audio": "https://raw.githubusercontent.com/galalemad75-creator/sleep-songs-files/main/audio/fwf84p_Moonlit_Dreams.mp3",
+          "image": "https://raw.githubusercontent.com/galalemad75-creator/sleep-songs-files/main/images/6068an_Screenshot_________________Video_Player.jpg"
+        }
+      ]
+    },
+    { "id": 3, "name": "Whispering Pines", "icon": "🌲", "songs": [] },
+    { "id": 4, "name": "Ocean Breeze", "icon": "🌊", "songs": [] },
+    { "id": 5, "name": "Starlight Serenade", "icon": "⭐", "songs": [] },
+    { "id": 6, "name": "Gentle Rain", "icon": "🌧️", "songs": [] },
+    { "id": 7, "name": "Morning Dew", "icon": "🌅", "songs": [] },
+    { "id": 8, "name": "Sunset Glow", "icon": "🌇", "songs": [] },
+    { "id": 9, "name": "Night Owl", "icon": "🦉", "songs": [] },
+    { "id": 10, "name": "Silent Valley", "icon": "🏔️", "songs": [] },
+    { "id": 11, "name": "Forest Walk", "icon": "🌳", "songs": [] },
+    { "id": 12, "name": "River Flow", "icon": "🏞️", "songs": [] },
+    { "id": 13, "name": "Mountain Echo", "icon": "⛰️", "songs": [] },
+    { "id": 14, "name": "Cloud Nine", "icon": "☁️", "songs": [] },
+    { "id": 15, "name": "Breeze of Hope", "icon": "🍃", "songs": [] },
+    { "id": 16, "name": "Peaceful Mind", "icon": "☮️", "songs": [] },
+    { "id": 17, "name": "Harmony", "icon": "🎵", "songs": [] },
+    { "id": 18, "name": "Soft Waves", "icon": "🌊", "songs": [] },
+    { "id": 19, "name": "Evening Calm", "icon": "🌆", "songs": [] },
+    { "id": 20, "name": "Lunar Phase", "icon": "🌕", "songs": [] },
+    { "id": 21, "name": "Deep Sleep", "icon": "💤", "songs": [] },
+    { "id": 22, "name": "Wind Chimes", "icon": "🎐", "songs": [] },
+    { "id": 23, "name": "Starlit Path", "icon": "✨", "songs": [] },
+    { "id": 24, "name": "Dream Weaver", "icon": "🌀", "songs": [] },
+    { "id": 25, "name": "Calm Waters", "icon": "💧", "songs": [] },
+    { "id": 26, "name": "Tranquil Night", "icon": "🌃", "songs": [] },
+    { "id": 27, "name": "Healing Rain", "icon": "🌧️", "songs": [] },
+    { "id": 28, "name": "Sleepy Town", "icon": "🏘️", "songs": [] },
+    { "id": 29, "name": "Night Whisper", "icon": "🤫", "songs": [] },
+    { "id": 30, "name": "Sleepy Train", "icon": "🚂", "songs": [] },
+    {
+      "id": 31,
+      "name": "Only Music",
+      "icon": "🎼",
+      "songs": [],
+      "isMusic": true
+    }
+  ]
+}

@@ -231,24 +231,44 @@ function initScrollEffects() {
 
 // ===== Load Chapters =====
 async function loadChapters() {
+    // 1. Try loading from static data.json (GitHub raw URL)
     try {
-        const data = await API.get('/chapters');
-        chapters = data.chapters || data;
-    } catch (e) {
-        const stored = localStorage.getItem('chapters');
-        if (stored) {
-            chapters = JSON.parse(stored);
-        } else {
-            chapters = JSON.parse(JSON.stringify(DEFAULT_CHAPTERS));
-            // Populate default songs
-            chapters.forEach(ch => {
-                if (DEFAULT_SONGS[ch.id] && ch.songs.length === 0) {
-                    ch.songs = JSON.parse(JSON.stringify(DEFAULT_SONGS[ch.id]));
-                }
-            });
-            saveChaptersLocal();
+        var jsonUrl = 'data.json';
+        if (location.hostname.includes('github.io')) {
+            jsonUrl = 'https://raw.githubusercontent.com/galalemad75-creator/sleep-songs-files/main/data.json';
         }
+        const res = await fetch(jsonUrl + '?t=' + Date.now(), { cache: 'no-store' });
+        if (res.ok) {
+            const data = await res.json();
+            if (data.chapters && data.chapters.length > 0) {
+                chapters = data.chapters;
+                saveChaptersLocal();
+                renderChapters();
+                updateStats();
+                return;
+            }
+        }
+    } catch (e) {
+        console.warn('[Load] data.json not found, trying localStorage');
     }
+
+    // 2. Fallback to localStorage
+    const stored = localStorage.getItem('chapters');
+    if (stored) {
+        try {
+            const parsed = JSON.parse(stored);
+            if (parsed && parsed.length > 0) {
+                chapters = parsed;
+                renderChapters();
+                updateStats();
+                return;
+            }
+        } catch(e) {}
+    }
+
+    // 3. Last resort: defaults
+    chapters = JSON.parse(JSON.stringify(DEFAULT_CHAPTERS));
+    saveChaptersLocal();
     renderChapters();
     updateStats();
 }
@@ -1784,3 +1804,29 @@ setInterval(function() {
         }
     });
 }, 2000);
+// ===== Export Data for GitHub =====
+function exportDataJson() {
+    const data = {
+        version: 1,
+        chapters: chapters.map(ch => ({
+            id: ch.id,
+            name: ch.name,
+            icon: ch.icon,
+            songs: (ch.songs || []).map(sg => ({
+                id: sg.id || ('song_' + ch.id + '_' + Date.now()),
+                title: sg.title,
+                audio: sg.audio || '',
+                image: sg.image || ''
+            })),
+            ...(ch.isMusic ? { isMusic: true } : {})
+        }))
+    };
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'data.json';
+    a.click();
+    URL.revokeObjectURL(url);
+    toast('data.json downloaded! Upload it to your GitHub repo.', 'success');
+}

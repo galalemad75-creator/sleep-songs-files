@@ -339,6 +339,7 @@
                 <h2>🎵 Admin Dashboard</h2>
                 <div class="admin-actions">
                     <button onclick="showGithubSettings()" class="btn btn-sm">⚙️ GitHub Settings</button>
+                    <button onclick="exportDataJson()" class="btn btn-sm btn-primary">📦 Export data.json</button>
                     <button onclick="showChangePassword()" class="btn btn-sm">🔑 Change Password</button>
                     <button onclick="adminLogout()" class="btn btn-sm btn-danger">Logout</button>
                 </div>
@@ -427,7 +428,6 @@
         </div>
     </div>
 
-    <script src="config.js"></script>
     <script src="app.v4.js"></script>
 
 <!-- Floating Stop Button (mobile-friendly) -->
@@ -445,7 +445,6 @@
 </script>
 
     <div id="versionBadge" style="position:fixed;bottom:4px;left:4px;background:#22c55e;color:#fff;padding:2px 8px;border-radius:10px;font-size:10px;z-index:99999;font-family:monospace;opacity:0.8;">v7.9</div>
-<script src="supabase-sync.js"></script>
 <script>
 // Error tracking - catch and log all JS errors for debugging
 window.onerror = function(msg, src, line, col, err) {
