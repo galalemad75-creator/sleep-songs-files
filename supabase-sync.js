@@ -194,6 +194,10 @@ CREATE POLICY "w_st" ON public.settings FOR ALL USING (true) WITH CHECK (true);
   }
 
   // Unified upload: Cloudinary → GitHub → error (NO base64 fallback)
+  // CRITICAL: Must replace the function declaration in app.v4.js
+  // Since 'async function uploadFile()' in app.v4.js creates a global var,
+  // we delete it first then reassign
+  try { delete window.uploadFile; } catch {}
   window.uploadFile = async function (file, oldUrl) {
     // Try Cloudinary first (if configured)
     if (CLD_NAME && CLD_PRESET) {
@@ -204,6 +208,17 @@ CREATE POLICY "w_st" ON public.settings FOR ALL USING (true) WITH CHECK (true);
     // GitHub (primary)
     return await uploadToGitHub(file, oldUrl);
   };
+  // Also patch GITHUB_CONFIG so original code (if somehow still called) uses fresh token
+  if (typeof GITHUB_CONFIG !== 'undefined') {
+    const freshToken = localStorage.getItem('gh_token') || '';
+    const freshRepo = localStorage.getItem('gh_repo') || '';
+    if (freshToken) GITHUB_CONFIG.token = freshToken;
+    if (freshRepo) {
+      GITHUB_CONFIG.owner = freshRepo.split('/')[0];
+      GITHUB_CONFIG.repo = freshRepo.split('/')[1];
+    }
+  }
+  console.log('[DB] uploadFile overridden ✅');
 
   // ===== 4. SMART LOAD CHAPTERS =====
   window.loadChapters = async function () {
