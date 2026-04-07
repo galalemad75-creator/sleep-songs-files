@@ -1,234 +1,379 @@
 /**
- * Enhanced Supabase Sync + Cloudinary Upload
- * - Uploads files to Cloudinary (primary) or GitHub (fallback)
- * - NEVER stores base64 in localStorage
- * - Syncs chapter metadata to Supabase kv_store
+ * Sleep Songs — Final Data Layer
+ * 
+ * Architecture:
+ *   Cloudinary  → file uploads (audio + images)
+ *   Supabase    → data storage (chapters, settings, favorites, playCounts)
+ *   localStorage → fast cache only (not source of truth)
+ *   GitHub      → optional backup for files
+ *
+ * This script replaces ALL localStorage-first logic with Supabase-first.
  */
 (async function () {
   'use strict';
 
-  const PREFIX = location.pathname.replace(/[^a-zA-Z]/g, '_').slice(0, 8) + '_';
+  // ===== Config =====
+  const SB_URL = typeof SUPABASE_URL !== 'undefined' ? SUPABASE_URL : '';
+  const SB_KEY = typeof SUPABASE_ANON_KEY !== 'undefined' ? SUPABASE_ANON_KEY : '';
   let supa = null;
-  let supaOk = false;
+  let supaReady = false;
 
-  // ===== 1. Supabase Connection =====
-  if (typeof SUPABASE_URL !== 'undefined' && SUPABASE_URL) {
+  // ===== 1. Init Supabase =====
+  if (SB_URL && SB_KEY) {
     try {
       const s = document.createElement('script');
       s.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js';
       document.head.appendChild(s);
-      await new Promise((r) => (s.onload = r));
-      supa = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-      await supa.from('kv_store').select('key').limit(1);
-      supaOk = true;
-      console.log('[Sync] ✅ Supabase connected');
+      await new Promise((r, j) => { s.onload = r; s.onerror = j; });
+      supa = window.supabase.createClient(SB_URL, SB_KEY);
+
+      // Test connection
+      await supa.from('chapters').select('id').limit(1);
+      supaReady = true;
+      console.log('[DB] ✅ Supabase connected');
     } catch (e) {
-      console.warn('[Sync] ⚠️ Supabase offline:', e.message);
+      console.warn('[DB] ⚠️ Supabase offline:', e.message);
     }
   }
 
-  // ===== 2. Enhanced localStorage.setItem → sync to Supabase =====
-  if (supaOk) {
-    const origSet = localStorage.setItem.bind(localStorage);
-    localStorage.setItem = function (k, v) {
-      origSet(k, v);
-      // Don't sync huge base64 blobs — only sync small metadata keys
-      if (k === 'localAudio' || k === 'uploadedAudioFiles') return;
-      try {
-        supa
-          .from('kv_store')
-          .upsert(
-            { key: k, value: JSON.parse(v), updated_at: new Date().toISOString() },
-            { onConflict: 'key' }
-          )
-          .catch(() => {});
-      } catch {
-        // non-JSON values (theme, cookies, etc.) — skip sync
-      }
-    };
-    console.log('[Sync] localStorage.setItem patched for Supabase sync');
-  }
+  // ===== 2. DB Helpers =====
+  const DB = {
+    // --- Chapters ---
+    async loadChapters() {
+      if (!supaReady) throw new Error('Supabase not ready');
+      const { data, error } = await supa
+        .from('chapters')
+        .select('*')
+        .order('id');
+      if (error) throw error;
+      return data.map(row => ({
+        id: row.id,
+        name: row.name,
+        icon: row.icon,
+        songs: Array.isArray(row.songs) ? row.songs : JSON.parse(row.songs || '[]')
+      }));
+    },
+
+    async saveChapter(chapter) {
+      if (!supaReady) throw new Error('Supabase not ready');
+      const { error } = await supa
+        .from('chapters')
+        .upsert({
+          id: chapter.id,
+          name: chapter.name,
+          icon: chapter.icon || '📚',
+          songs: chapter.songs,
+          updated_at: new Date().toISOString()
+        }, { onConflict: 'id' });
+      if (error) throw error;
+    },
+
+    async deleteChapter(id) {
+      if (!supaReady) throw new Error('Supabase not ready');
+      const { error } = await supa.from('chapters').delete().eq('id', id);
+      if (error) throw error;
+    },
+
+    async addChapter(id, name, icon) {
+      if (!supaReady) throw new Error('Supabase not ready');
+      const { error } = await supa
+        .from('chapters')
+        .insert({ id, name, icon: icon || '📚', songs: [] });
+      if (error) throw error;
+    },
+
+    // --- Settings ---
+    async getSetting(key) {
+      if (!supaReady) return null;
+      const { data, error } = await supa
+        .from('settings')
+        .select('value')
+        .eq('key', key)
+        .single();
+      if (error) return null;
+      return data.value;
+    },
+
+    async setSetting(key, value) {
+      if (!supaReady) throw new Error('Supabase not ready');
+      const { error } = await supa
+        .from('settings')
+        .upsert({ key, value, updated_at: new Date().toISOString() }, { onConflict: 'key' });
+      if (error) throw error;
+    }
+  };
 
   // ===== 3. Cloudinary Upload =====
   async function uploadToCloudinary(file) {
-    if (typeof CLOUDINARY_CLOUD_NAME === 'undefined' || !CLOUDINARY_CLOUD_NAME) {
-      throw new Error('Cloudinary not configured');
-    }
+    const cloudName = typeof CLOUDINARY_CLOUD_NAME !== 'undefined' ? CLOUDINARY_CLOUD_NAME : '';
+    const preset = typeof CLOUDINARY_UPLOAD_PRESET !== 'undefined' ? CLOUDINARY_UPLOAD_PRESET : 'ml_default';
+    if (!cloudName) throw new Error('Cloudinary not configured');
+
     const folder = file.type.startsWith('audio/') ? 'sleep-songs/audio' : 'sleep-songs/images';
-    const formData = new FormData();
-    formData.append('file', file);
-    formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET || 'ml_default');
-    formData.append('folder', folder);
+    const fd = new FormData();
+    fd.append('file', file);
+    fd.append('upload_preset', preset);
+    fd.append('folder', folder);
 
-    const res = await fetch(
-      `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/auto/upload`,
-      { method: 'POST', body: formData }
-    );
-
+    const res = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/auto/upload`, {
+      method: 'POST',
+      body: fd
+    });
     if (!res.ok) {
       const err = await res.json().catch(() => ({}));
-      throw new Error(err.error?.message || `Cloudinary upload failed: ${res.status}`);
+      throw new Error(err.error?.message || `Cloudinary: ${res.status}`);
     }
-
     const data = await res.json();
     console.log('[Upload] ✅ Cloudinary:', data.secure_url);
-    return { url: data.secure_url, public_id: data.public_id };
+    return data.secure_url;
   }
 
   // ===== 4. GitHub Upload (fallback) =====
   async function uploadToGitHub(file) {
-    const GH_TOKEN = localStorage.getItem('gh_token');
-    if (!GH_TOKEN) throw new Error('No GitHub token');
+    const token = localStorage.getItem('gh_token');
+    if (!token) throw new Error('No GitHub token');
 
-    const GH_REPO = localStorage.getItem('gh_repo') || 'galalemad75-creator/sleep-songs-files';
-    const [owner, repo] = GH_REPO.split('/');
+    const repoStr = localStorage.getItem('gh_repo') || 'galalemad75-creator/sleep-songs-files';
+    const [owner, repo] = repoStr.split('/');
     const folder = file.type.startsWith('audio/') ? 'audio' : 'images';
     const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_');
 
-    // Short hash to avoid collisions
-    const fileHash = await new Promise((resolve) => {
-      const reader = new FileReader();
-      reader.onload = () => {
-        const arr = new Uint8Array(reader.result);
-        let hash = 0;
-        for (let i = 0; i < Math.min(arr.length, 1024); i++)
-          hash = ((hash << 5) - hash + arr[i]) | 0;
-        resolve(Math.abs(hash).toString(36).slice(0, 6));
+    // Quick hash for unique filename
+    const hash = await new Promise(res => {
+      const r = new FileReader();
+      r.onload = () => {
+        const a = new Uint8Array(r.result);
+        let h = 0;
+        for (let i = 0; i < Math.min(a.length, 1024); i++) h = ((h << 5) - h + a[i]) | 0;
+        res(Math.abs(h).toString(36).slice(0, 6));
       };
-      reader.readAsArrayBuffer(file.slice(0, 1024));
+      r.readAsArrayBuffer(file.slice(0, 1024));
     });
 
-    const fileName = `${folder}/${fileHash}_${safeName}`;
-    const base64 = await new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = () => resolve(reader.result.split(',')[1]);
-      reader.onerror = reject;
-      reader.readAsDataURL(file);
+    const fileName = `${folder}/${hash}_${safeName}`;
+    const base64 = await new Promise((res, rej) => {
+      const r = new FileReader();
+      r.onload = () => res(r.result.split(',')[1]);
+      r.onerror = rej;
+      r.readAsDataURL(file);
     });
 
-    const res = await fetch(
-      `https://api.github.com/repos/${owner}/${repo}/contents/${fileName}`,
-      {
-        method: 'PUT',
-        headers: {
-          Authorization: `token ${GH_TOKEN}`,
-          Accept: 'application/vnd.github.v3+json',
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          message: `Upload ${fileName}`,
-          content: base64,
-          branch: 'main',
-        }),
-      }
-    );
-
-    if (!res.ok) throw new Error(`GitHub upload failed: ${res.status}`);
-    const data = await res.json();
+    const resp = await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/${fileName}`, {
+      method: 'PUT',
+      headers: {
+        Authorization: `token ${token}`,
+        Accept: 'application/vnd.github.v3+json',
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ message: `Upload ${fileName}`, content: base64, branch: 'main' })
+    });
+    if (!resp.ok) throw new Error(`GitHub: ${resp.status}`);
+    const data = await resp.json();
     console.log('[Upload] ✅ GitHub:', data.content.download_url);
-    return { url: data.content.download_url };
+    return data.content.download_url;
   }
 
-  // ===== 5. Delete old file from GitHub =====
-  async function deleteOldGithubFile(downloadUrl) {
-    const GH_TOKEN = localStorage.getItem('gh_token');
-    if (!GH_TOKEN || !downloadUrl) return;
-    try {
-      const parts = downloadUrl.split('/raw.githubusercontent.com/');
-      if (parts.length < 2) return;
-      const pathParts = parts[1].split('/');
-      const filePath = pathParts.slice(3).join('/');
-      if (!filePath.startsWith('audio/') && !filePath.startsWith('images/')) return;
-
-      const GH_REPO = localStorage.getItem('gh_repo') || 'galalemad75-creator/sleep-songs-files';
-      const [owner, repo] = GH_REPO.split('/');
-
-      const getRes = await fetch(
-        `https://api.github.com/repos/${owner}/${repo}/contents/${filePath}`,
-        {
-          headers: { Authorization: `token ${GH_TOKEN}`, Accept: 'application/vnd.github.v3+json' },
-        }
-      );
-      if (getRes.ok) {
-        const fileData = await getRes.json();
-        await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/${filePath}`, {
-          method: 'DELETE',
-          headers: {
-            Authorization: `token ${GH_TOKEN}`,
-            Accept: 'application/vnd.github.v3+json',
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            message: `Remove old: ${filePath}`,
-            sha: fileData.sha,
-            branch: 'main',
-          }),
-        });
-        console.log('[Upload] 🗑️ Deleted old GitHub file:', filePath);
-      }
-    } catch (e) {
-      console.warn('[Upload] Could not delete old file:', e.message);
-    }
-  }
-
-  // ===== 6. Override window.uploadFile =====
-  // Priority: Cloudinary → GitHub → Error (NO base64 fallback)
+  // ===== 5. Unified Upload (Cloudinary → GitHub → error) =====
   window.uploadFile = async function (file, oldUrl) {
     // Delete old GitHub file if replacing
-    if (oldUrl && oldUrl.includes('raw.githubusercontent.com')) {
-      await deleteOldGithubFile(oldUrl);
+    if (oldUrl && oldUrl.includes('raw.githubusercontent.com') && localStorage.getItem('gh_token')) {
+      try {
+        const parts = oldUrl.split('/raw.githubusercontent.com/');
+        if (parts.length >= 2) {
+          const pathParts = parts[1].split('/');
+          const filePath = pathParts.slice(3).join('/');
+          const repoStr = localStorage.getItem('gh_repo') || 'galalemad75-creator/sleep-songs-files';
+          const [o, r] = repoStr.split('/');
+          const token = localStorage.getItem('gh_token');
+          const gRes = await fetch(`https://api.github.com/repos/${o}/${r}/contents/${filePath}`, {
+            headers: { Authorization: `token ${token}`, Accept: 'application/vnd.github.v3+json' }
+          });
+          if (gRes.ok) {
+            const gData = await gRes.json();
+            await fetch(`https://api.github.com/repos/${o}/${r}/contents/${filePath}`, {
+              method: 'DELETE',
+              headers: { Authorization: `token ${token}`, Accept: 'application/vnd.github.v3+json', 'Content-Type': 'application/json' },
+              body: JSON.stringify({ message: `Remove: ${filePath}`, sha: gData.sha, branch: 'main' })
+            });
+          }
+        }
+      } catch (e) { console.warn('[Upload] Cleanup old file:', e.message); }
     }
 
     // Try Cloudinary first
     try {
-      return await uploadToCloudinary(file);
+      return { url: await uploadToCloudinary(file) };
     } catch (e) {
       console.warn('[Upload] Cloudinary failed, trying GitHub:', e.message);
     }
 
-    // Fallback to GitHub
+    // Fallback: GitHub
     try {
-      return await uploadToGitHub(file);
+      return { url: await uploadToGitHub(file) };
     } catch (e) {
-      console.error('[Upload] GitHub also failed:', e.message);
-      // Return a blob URL as last resort (session-only, no localStorage bloat)
-      const blobUrl = URL.createObjectURL(file);
-      console.warn('[Upload] ⚠️ Using session-only blob URL');
-      return { url: blobUrl };
+      console.error('[Upload] All uploads failed:', e.message);
+      throw new Error('Upload failed. Check Cloudinary config or GitHub token.');
     }
   };
 
-  // ===== 7. Clean up old base64 from localStorage =====
-  try {
-    const stored = localStorage.getItem('chapters');
-    if (stored) {
-      const chapters = JSON.parse(stored);
-      let cleaned = false;
-      chapters.forEach((ch) => {
-        ch.songs.forEach((song) => {
-          // Remove base64 audio (data:audio/...)
-          if (song.audio && song.audio.startsWith('data:')) {
-            song.audio = '';
-            cleaned = true;
-          }
-          // Remove base64 images (data:image/...)
-          if (song.image && song.image.startsWith('data:')) {
-            song.image = '';
-            cleaned = true;
-          }
-        });
-      });
-      if (cleaned) {
-        localStorage.setItem('chapters', JSON.stringify(chapters));
-        console.log('[Sync] 🧹 Cleaned base64 data from chapters');
+  // ===== 6. Override loadChapters =====
+  const origLoadChapters = window.loadChapters;
+  window.loadChapters = async function () {
+    if (supaReady) {
+      try {
+        window.chapters = await DB.loadChapters();
+        // Cache in localStorage for offline/fast access
+        localStorage.setItem('chapters', JSON.stringify(window.chapters));
+        console.log('[DB] ✅ Loaded', window.chapters.length, 'chapters from Supabase');
+      } catch (e) {
+        console.warn('[DB] Supabase load failed, using cache:', e.message);
+        // Fallback to localStorage cache
+        const stored = localStorage.getItem('chapters');
+        if (stored) {
+          window.chapters = JSON.parse(stored);
+        }
+      }
+    } else {
+      // Supabase not available — use original logic
+      const stored = localStorage.getItem('chapters');
+      if (stored) {
+        window.chapters = JSON.parse(stored);
       }
     }
-    // Remove old localAudio blob
-    localStorage.removeItem('localAudio');
-  } catch (e) {
-    console.warn('[Sync] Cleanup failed:', e.message);
+    if (typeof renderChapters === 'function') renderChapters();
+    if (typeof updateStats === 'function') updateStats();
+  };
+
+  // ===== 7. Override saveChaptersLocal =====
+  window.saveChaptersLocal = async function () {
+    // Always save to localStorage (fast cache)
+    localStorage.setItem('chapters', JSON.stringify(window.chapters));
+
+    // Sync each chapter to Supabase
+    if (supaReady) {
+      for (const ch of window.chapters) {
+        try {
+          await DB.saveChapter(ch);
+        } catch (e) {
+          console.warn('[DB] Failed to save chapter', ch.id, ':', e.message);
+        }
+      }
+      console.log('[DB] ✅ Synced to Supabase');
+    }
+  };
+
+  // ===== 8. Override settings functions =====
+  // Save ad settings
+  const origSaveAd = window.saveAdSettings;
+  window.saveAdSettings = async function () {
+    const settings = {
+      header: { enabled: document.getElementById('adHeaderEnabled')?.checked, code: document.getElementById('adHeaderCode')?.value || '' },
+      beforeChapters: { enabled: document.getElementById('adBeforeChaptersEnabled')?.checked, code: document.getElementById('adBeforeChaptersCode')?.value || '' },
+      middle: { enabled: document.getElementById('adMiddleEnabled')?.checked, code: document.getElementById('adMiddleCode')?.value || '' },
+      afterChapters: { enabled: document.getElementById('adAfterChaptersEnabled')?.checked, code: document.getElementById('adAfterChaptersCode')?.value || '' },
+      footer: { enabled: document.getElementById('adFooterEnabled')?.checked, code: document.getElementById('adFooterCode')?.value || '' },
+      global: { enabled: document.getElementById('adGlobalEnabled')?.checked, code: document.getElementById('adGlobalCode')?.value || '' }
+    };
+    localStorage.setItem('ad_settings', JSON.stringify(settings));
+    if (supaReady) {
+      try { await DB.setSetting('ad_settings', settings); } catch (e) { console.warn('[DB] Ad save:', e.message); }
+    }
+  };
+
+  // Save contact info
+  const origSaveContact = window.saveContactInfo;
+  window.saveContactInfo = async function () {
+    const info = {
+      email: document.getElementById('contactEmail')?.value || '',
+      youtube: document.getElementById('contactYoutube')?.value || '',
+      spotify: document.getElementById('contactSpotify')?.value || '',
+      instagram: document.getElementById('contactInstagram')?.value || '',
+      twitter: document.getElementById('contactTwitter')?.value || '',
+      facebook: document.getElementById('contactFacebook')?.value || '',
+      tiktok: document.getElementById('contactTiktok')?.value || '',
+      website: document.getElementById('contactWebsite')?.value || '',
+      message: document.getElementById('contactMessage')?.value || ''
+    };
+    localStorage.setItem('contact_info', JSON.stringify(info));
+    if (supaReady) {
+      try { await DB.setSetting('contact_info', info); } catch (e) { console.warn('[DB] Contact save:', e.message); }
+    }
+    if (typeof origSaveContact === 'function') origSaveContact();
+    if (typeof toast === 'function') toast('Contact info saved!', 'success');
+  };
+
+  // Save play counts
+  const origSavePlayCounts = window.savePlayCounts;
+  window.savePlayCounts = async function () {
+    localStorage.setItem('playCounts', JSON.stringify(window.playCounts || {}));
+    if (supaReady) {
+      try { await DB.setSetting('play_counts', window.playCounts || {}); } catch {}
+    }
+  };
+
+  // Save favorites
+  const origSaveFavorites = window.saveFavorites;
+  window.saveFavorites = async function () {
+    localStorage.setItem('favorites', JSON.stringify(window.favorites || {}));
+    if (supaReady) {
+      try { await DB.setSetting('favorites', window.favorites || {}); } catch {}
+    }
+  };
+
+  // ===== 9. Load settings from Supabase =====
+  async function loadSettingsFromDB() {
+    if (!supaReady) return;
+    try {
+      const adSettings = await DB.getSetting('ad_settings');
+      if (adSettings) {
+        localStorage.setItem('ad_settings', JSON.stringify(adSettings));
+        console.log('[DB] ✅ Loaded ad settings');
+      }
+      const contactInfo = await DB.getSetting('contact_info');
+      if (contactInfo) {
+        localStorage.setItem('contact_info', JSON.stringify(contactInfo));
+        console.log('[DB] ✅ Loaded contact info');
+      }
+      const playCounts = await DB.getSetting('play_counts');
+      if (playCounts) localStorage.setItem('playCounts', JSON.stringify(playCounts));
+      const favorites = await DB.getSetting('favorites');
+      if (favorites) localStorage.setItem('favorites', JSON.stringify(favorites));
+    } catch (e) {
+      console.warn('[DB] Settings load:', e.message);
+    }
   }
 
-  window.SUPABASE_SYNC = supaOk;
-  console.log('[Sync] 🚀 Enhanced sync ready (Cloudinary + GitHub + Supabase)');
+  // ===== 10. Cleanup old base64 data =====
+  function cleanupLocalStorage() {
+    try {
+      const stored = localStorage.getItem('chapters');
+      if (stored) {
+        const chapters = JSON.parse(stored);
+        let cleaned = false;
+        chapters.forEach(ch => {
+          (ch.songs || []).forEach(song => {
+            if (song.audio && song.audio.startsWith('data:')) { song.audio = ''; cleaned = true; }
+            if (song.image && song.image.startsWith('data:')) { song.image = ''; cleaned = true; }
+          });
+        });
+        if (cleaned) {
+          localStorage.setItem('chapters', JSON.stringify(chapters));
+          console.log('[DB] 🧹 Cleaned base64 from chapters');
+        }
+      }
+      localStorage.removeItem('localAudio');
+    } catch (e) {
+      console.warn('[DB] Cleanup error:', e.message);
+    }
+  }
+
+  // ===== 11. Init =====
+  cleanupLocalStorage();
+  await loadSettingsFromDB();
+
+  // Export DB helper globally
+  window.DB = DB;
+  window.SUPABASE_SYNC = supaReady;
+
+  console.log('[DB] 🚀 Sleep Songs data layer ready (Supabase: ' + (supaReady ? 'ON' : 'OFF') + ', Cloudinary: ON)');
 })();
