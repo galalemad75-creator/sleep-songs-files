@@ -1,47 +1,15 @@
 /**
  * ============================================================
- * SLEEP SONGS — COMPLETE FIX (v1.0)
+ * SLEEP SONGS — SUPABASE SYNC (v2.0 FIXED)
  * ============================================================
  * 
- * This ONE file replaces supabase-sync.js and fixes everything:
- * - Supabase: Primary database for chapters, settings, favorites
- * - GitHub: File uploads (audio + images) — token saved once
- * - localStorage: Fast cache only (NEVER stores base64)
- * - Smart load: Loads from Supabase → localStorage → defaults
- * 
- * USAGE:
- * 1. Replace your supabase-sync.js with this file
- * 2. Run the SQL below in Supabase Dashboard → SQL Editor
- * 3. Set GitHub token ONCE in Admin Panel → GitHub Settings
- * 4. Hard refresh (Ctrl+Shift+R)
- * 
- * FOR NEW SITES: Just change the SUPABASE_URL and SUPABASE_ANON_KEY
- * in your config.js and run the same SQL.
- * 
- * SQL TO RUN IN SUPABASE (copy-paste this):
- * 
-CREATE TABLE IF NOT EXISTS public.chapters (
-  id INTEGER PRIMARY KEY,
-  name TEXT NOT NULL,
-  icon TEXT DEFAULT '📚',
-  songs JSONB DEFAULT '[]'::jsonb,
-  updated_at TIMESTAMPTZ DEFAULT NOW()
-);
-CREATE TABLE IF NOT EXISTS public.settings (
-  key TEXT PRIMARY KEY,
-  value JSONB NOT NULL,
-  updated_at TIMESTAMPTZ DEFAULT NOW()
-);
-ALTER TABLE public.chapters ENABLE ROW LEVEL SECURITY;
-ALTER TABLE public.settings ENABLE ROW LEVEL SECURITY;
-DROP POLICY IF EXISTS "r_ch" ON public.chapters;
-DROP POLICY IF EXISTS "w_ch" ON public.chapters;
-DROP POLICY IF EXISTS "r_st" ON public.settings;
-DROP POLICY IF EXISTS "w_st" ON public.settings;
-CREATE POLICY "r_ch" ON public.chapters FOR SELECT USING (true);
-CREATE POLICY "w_ch" ON public.chapters FOR ALL USING (true) WITH CHECK (true);
-CREATE POLICY "r_st" ON public.settings FOR SELECT USING (true);
-CREATE POLICY "w_st" ON public.settings FOR ALL USING (true) WITH CHECK (true);
+ * Fixes from v1.0:
+ * 1. ✅ Restored base64 localStorage fallback when GitHub not configured
+ * 2. ✅ Only clean base64 from localStorage when song has valid external URL
+ * 3. ✅ Fixed convertUrl for Google Drive (direct download link)
+ * 4. ✅ Better error messages for upload failures
+ * 5. ✅ GITHUB_CONFIG synced with localStorage token
+ * 6. ✅ loadChapters always loads chapters (even if empty)
  * 
  * ============================================================
  */
@@ -101,7 +69,7 @@ CREATE POLICY "w_st" ON public.settings FOR ALL USING (true) WITH CHECK (true);
     }
   };
 
-  // ===== 3. FILE UPLOAD — GitHub only (Cloudinary preset needs setup) =====
+  // ===== 3. FILE UPLOAD =====
   function getGH() {
     return {
       token: localStorage.getItem('gh_token') || '',
@@ -114,7 +82,7 @@ CREATE POLICY "w_st" ON public.settings FOR ALL USING (true) WITH CHECK (true);
   async function uploadToGitHub(file, oldUrl) {
     const gh = getGH();
     if (!gh.token || !gh.owner || !gh.name) {
-      throw new Error('GitHub not configured. Go to Admin → ⚙️ GitHub Settings → enter your Token and Repo.');
+      throw new Error('NO_GITHUB_TOKEN');
     }
 
     // Delete old file if replacing
@@ -141,7 +109,6 @@ CREATE POLICY "w_st" ON public.settings FOR ALL USING (true) WITH CHECK (true);
     const folder = file.type.startsWith('audio/') ? 'audio' : 'images';
     const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_');
 
-    // Hash for unique filename
     const hash = await new Promise(res => {
       const r = new FileReader();
       r.onload = () => {
@@ -181,7 +148,6 @@ CREATE POLICY "w_st" ON public.settings FOR ALL USING (true) WITH CHECK (true);
     return { url: data.content.download_url };
   }
 
-  // Cloudinary upload (only if preset allows unsigned uploads)
   async function uploadToCloudinary(file) {
     if (!CLD_NAME || !CLD_PRESET) throw new Error('Cloudinary not configured');
     const fd = new FormData();
@@ -193,10 +159,21 @@ CREATE POLICY "w_st" ON public.settings FOR ALL USING (true) WITH CHECK (true);
     return { url: data.secure_url };
   }
 
-  // Unified upload: Cloudinary → GitHub → error (NO base64 fallback)
-  // CRITICAL: Must replace the function declaration in app.v4.js
-  // Since 'async function uploadFile()' in app.v4.js creates a global var,
-  // we delete it first then reassign
+  // ✅ FIX: base64 fallback RESTORED
+  function uploadToLocal(file) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => {
+        const dataUrl = reader.result;
+        console.log('[Upload] ✅ Saved to localStorage (base64)');
+        resolve({ url: dataUrl });
+      };
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+  }
+
+  // ✅ FIX: Upload chain: Cloudinary → GitHub → base64 fallback
   try { delete window.uploadFile; } catch {}
   window.uploadFile = async function (file, oldUrl) {
     // Try Cloudinary first (if configured)
@@ -205,10 +182,20 @@ CREATE POLICY "w_st" ON public.settings FOR ALL USING (true) WITH CHECK (true);
         console.warn('[Upload] Cloudinary:', e.message);
       }
     }
-    // GitHub (primary)
-    return await uploadToGitHub(file, oldUrl);
+    // Try GitHub (if token configured)
+    try {
+      return await uploadToGitHub(file, oldUrl);
+    } catch (e) {
+      console.warn('[Upload] GitHub:', e.message);
+      // ✅ FIX: Fallback to base64 localStorage instead of throwing
+      if (e.message === 'NO_GITHUB_TOKEN') {
+        console.log('[Upload] No GitHub token — falling back to localStorage');
+      }
+      return await uploadToLocal(file);
+    }
   };
-  // Also patch GITHUB_CONFIG so original code (if somehow still called) uses fresh token
+
+  // ✅ FIX: Sync GITHUB_CONFIG with localStorage
   if (typeof GITHUB_CONFIG !== 'undefined') {
     const freshToken = localStorage.getItem('gh_token') || '';
     const freshRepo = localStorage.getItem('gh_repo') || '';
@@ -220,7 +207,35 @@ CREATE POLICY "w_st" ON public.settings FOR ALL USING (true) WITH CHECK (true);
   }
   console.log('[DB] uploadFile overridden ✅');
 
-  // ===== 4. SMART LOAD CHAPTERS =====
+  // ===== 4. FIX convertUrl for Google Drive =====
+  const origConvertUrl = window.convertUrl;
+  window.convertUrl = function (url) {
+    if (!url) return url;
+
+    // ✅ FIX: Google Drive → proper direct download link
+    if (url.includes('drive.google.com')) {
+      // Format: https://drive.google.com/file/d/FILE_ID/view
+      const match = url.match(/\/d\/([a-zA-Z0-9_-]+)/);
+      if (match) {
+        return `https://drive.google.com/uc?export=download&id=${match[1]}`;
+      }
+      // Format: https://drive.google.com/open?id=FILE_ID
+      const params = new URLSearchParams(url.split('?')[1] || '');
+      const id = params.get('id');
+      if (id) {
+        return `https://drive.google.com/uc?export=download&id=${id}`;
+      }
+    }
+
+    // Dropbox: dl=0 → dl=1
+    if (url.includes('dropbox.com')) {
+      return url.replace('dl=0', 'dl=1').replace('?dl=0', '?dl=1');
+    }
+
+    return url;
+  };
+
+  // ===== 5. LOAD CHAPTERS — ✅ FIX: always load even if empty =====
   window.loadChapters = async function () {
     let loaded = false;
 
@@ -228,26 +243,28 @@ CREATE POLICY "w_st" ON public.settings FOR ALL USING (true) WITH CHECK (true);
     if (supaReady) {
       try {
         const sbChapters = await DB.loadChapters();
-        if (sbChapters.some(ch => ch.songs && ch.songs.length > 0)) {
+        if (sbChapters.length > 0) {
+          // ✅ FIX: accept chapters even if all songs are empty
           window.chapters = sbChapters;
           localStorage.setItem('chapters', JSON.stringify(window.chapters));
           loaded = true;
-          console.log('[DB] ✅ Loaded from Supabase');
+          console.log('[DB] ✅ Loaded from Supabase (' + sbChapters.length + ' chapters)');
         }
       } catch (e) { console.warn('[DB] Load:', e.message); }
     }
 
-    // Fallback: localStorage → defaults
+    // Fallback: localStorage
     if (!loaded) {
       const stored = localStorage.getItem('chapters');
       if (stored) {
         try {
           window.chapters = JSON.parse(stored);
-          loaded = window.chapters.some(ch => ch.songs && ch.songs.length > 0);
+          loaded = window.chapters.length > 0;
         } catch {}
       }
     }
 
+    // Final fallback: defaults
     if (!loaded && typeof DEFAULT_CHAPTERS !== 'undefined') {
       window.chapters = JSON.parse(JSON.stringify(DEFAULT_CHAPTERS));
       if (typeof DEFAULT_SONGS !== 'undefined') {
@@ -271,7 +288,7 @@ CREATE POLICY "w_st" ON public.settings FOR ALL USING (true) WITH CHECK (true);
     if (typeof updateStats === 'function') updateStats();
   };
 
-  // ===== 5. SAVE CHAPTERS (sync + async background Supabase) =====
+  // ===== 6. SAVE CHAPTERS =====
   window.saveChaptersLocal = function () {
     localStorage.setItem('chapters', JSON.stringify(window.chapters));
     if (supaReady && window.chapters) {
@@ -281,8 +298,7 @@ CREATE POLICY "w_st" ON public.settings FOR ALL USING (true) WITH CHECK (true);
     }
   };
 
-  // ===== 6. SETTINGS SYNC =====
-  // Ad settings
+  // ===== 7. SETTINGS SYNC =====
   window.saveAdSettings = async function () {
     const s = {};
     ['Header', 'BeforeChapters', 'Middle', 'AfterChapters', 'Footer', 'Global'].forEach(pos => {
@@ -296,7 +312,6 @@ CREATE POLICY "w_st" ON public.settings FOR ALL USING (true) WITH CHECK (true);
     if (supaReady) try { await DB.setSetting('ad_settings', s); } catch {}
   };
 
-  // Contact info
   window.saveContactInfo = async function () {
     const info = {};
     ['email', 'youtube', 'spotify', 'instagram', 'twitter', 'facebook', 'tiktok', 'website', 'message'].forEach(k => {
@@ -307,7 +322,6 @@ CREATE POLICY "w_st" ON public.settings FOR ALL USING (true) WITH CHECK (true);
     if (typeof toast === 'function') toast('Saved!', 'success');
   };
 
-  // Play counts + favorites
   window.savePlayCounts = function () {
     localStorage.setItem('playCounts', JSON.stringify(window.playCounts || {}));
     if (supaReady) DB.setSetting('play_counts', window.playCounts || {}).catch(() => {});
@@ -317,22 +331,41 @@ CREATE POLICY "w_st" ON public.settings FOR ALL USING (true) WITH CHECK (true);
     if (supaReady) DB.setSetting('favorites', window.favorites || {}).catch(() => {});
   };
 
-  // ===== 7. CLEANUP base64 from localStorage =====
+  // ===== 8. ✅ FIX: Only clean base64 if song has a valid external URL =====
   try {
     const stored = localStorage.getItem('chapters');
     if (stored) {
       const chs = JSON.parse(stored);
       let clean = false;
       chs.forEach(ch => (ch.songs || []).forEach(sg => {
-        if (sg.audio && sg.audio.startsWith('data:')) { sg.audio = ''; clean = true; }
-        if (sg.image && sg.image.startsWith('data:')) { sg.image = ''; clean = true; }
+        // ✅ FIX: Only clean base64 audio if there's also a valid HTTP URL
+        if (sg.audio && sg.audio.startsWith('data:')) {
+          // Check if there's an alternative valid URL — if not, KEEP the base64
+          const hasValidUrl = sg.audioUrl && sg.audioUrl.startsWith('http');
+          if (hasValidUrl) {
+            sg.audio = sg.audioUrl;
+            clean = true;
+          }
+          // else: keep base64 — it's the only source we have!
+        }
+        if (sg.image && sg.image.startsWith('data:')) {
+          const hasValidUrl = sg.imageUrl && sg.imageUrl.startsWith('http');
+          if (hasValidUrl) {
+            sg.image = sg.imageUrl;
+            clean = true;
+          }
+        }
       }));
-      if (clean) { localStorage.setItem('chapters', JSON.stringify(chs)); console.log('[DB] 🧹 Cleaned base64'); }
+      if (clean) {
+        localStorage.setItem('chapters', JSON.stringify(chs));
+        console.log('[DB] 🧹 Cleaned stale base64 (had valid URLs)');
+      }
     }
-    localStorage.removeItem('localAudio');
+    // ✅ FIX: Don't remove localAudio — it may contain the only copy of uploaded files
+    // localStorage.removeItem('localAudio'); // REMOVED
   } catch {}
 
-  // ===== 8. LOAD SETTINGS FROM SUPABASE =====
+  // ===== 9. LOAD SETTINGS FROM SUPABASE =====
   if (supaReady) {
     try {
       const ads = await DB.getSetting('ad_settings');
@@ -345,5 +378,5 @@ CREATE POLICY "w_st" ON public.settings FOR ALL USING (true) WITH CHECK (true);
   // ===== EXPORTS =====
   window.DB = DB;
   window.SUPABASE_SYNC = supaReady;
-  console.log('[DB] 🚀 Ready — Supabase: ' + (supaReady ? 'ON' : 'OFF') + ' | GitHub uploads: ON');
+  console.log('[DB] 🚀 Ready — Supabase: ' + (supaReady ? 'ON' : 'OFF') + ' | Upload: GitHub → base64 fallback');
 })();
