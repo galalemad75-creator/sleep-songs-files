@@ -161,20 +161,25 @@ const APP_VERSION = '6.1';
 
 // ===== Init =====
 document.addEventListener('DOMContentLoaded', () => {
-    // Clear old data if version changed
-    if (localStorage.getItem('app_version') !== APP_VERSION) {
-        
-        localStorage.setItem('app_version', APP_VERSION);
+    try {
+        // Clear old data if version changed
+        if (localStorage.getItem('app_version') !== APP_VERSION) {
+            localStorage.setItem('app_version', APP_VERSION);
+        }
+        createStars();
+        loadChapters();
+        loadContactInfo();
+        loadFavorites();
+        initScrollEffects();
+        checkAdminSession();
+        loadPlayCounts();
+        injectAds(); // Load and inject saved ads on page load
+        initCookieConsent(); // Show cookie banner if not accepted yet
+    } catch (err) {
+        console.error('[Init] Error during page load:', err);
+        // ✅ FIX: Ensure chapters render even if other init steps fail
+        try { loadChapters(); } catch(e2) { console.error('[Init] Critical:', e2); }
     }
-    createStars();
-    loadChapters();
-    loadContactInfo();
-    loadFavorites();
-    initScrollEffects();
-    checkAdminSession();
-    loadPlayCounts();
-    injectAds(); // Load and inject saved ads on page load
-    initCookieConsent(); // Show cookie banner if not accepted yet
 });
 
 // ===== Android Hardware Back Button =====
@@ -367,7 +372,6 @@ function openChapter(chapterId) {
                                 <div class="song-play-icon">▶</div>
                             </div>
                             <div class="song-card-actions">
-                                </button>
                                 <button class="like-btn ${liked ? 'liked' : ''}" data-id="${songId}"
                                         onclick="event.stopPropagation(); toggleFavorite('${songId}')">
                                     ${liked ? '❤️' : '🤍'}
