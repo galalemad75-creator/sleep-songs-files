@@ -28,35 +28,36 @@ function toggleTheme() {
 const DEFAULT_CHAPTERS = [
     { id: 1, name: 'Dreamland Clouds', icon: '☁️', songs: [] },
     { id: 2, name: 'Moonlit Dreams', icon: '🌙', songs: [] },
-    { id: 3, name: 'Whispering Pines', icon: '🌲', songs: [] },
-    { id: 4, name: 'Ocean Breeze', icon: '🌊', songs: [] },
-    { id: 5, name: 'Starlight Serenade', icon: '⭐', songs: [] },
-    { id: 6, name: 'Gentle Rain', icon: '🌧️', songs: [] },
-    { id: 7, name: 'Morning Dew', icon: '🌅', songs: [] },
-    { id: 8, name: 'Sunset Glow', icon: '🌇', songs: [] },
-    { id: 9, name: 'Night Owl', icon: '🦉', songs: [] },
-    { id: 10, name: 'Silent Valley', icon: '🏔️', songs: [] },
-    { id: 11, name: 'Forest Walk', icon: '🌳', songs: [] },
-    { id: 12, name: 'River Flow', icon: '🏞️', songs: [] },
-    { id: 13, name: 'Mountain Echo', icon: '⛰️', songs: [] },
-    { id: 14, name: 'Cloud Nine', icon: '☁️', songs: [] },
-    { id: 15, name: 'Breeze of Hope', icon: '🍃', songs: [] },
-    { id: 16, name: 'Peaceful Mind', icon: '☮️', songs: [] },
-    { id: 17, name: 'Harmony', icon: '🎵', songs: [] },
-    { id: 18, name: 'Soft Waves', icon: '🌊', songs: [] },
-    { id: 19, name: 'Evening Calm', icon: '🌆', songs: [] },
-    { id: 20, name: 'Lunar Phase', icon: '🌕', songs: [] },
-    { id: 21, name: 'Deep Sleep', icon: '💤', songs: [] },
-    { id: 22, name: 'Wind Chimes', icon: '🎐', songs: [] },
-    { id: 23, name: 'Starlit Path', icon: '✨', songs: [] },
-    { id: 24, name: 'Dream Weaver', icon: '🌀', songs: [] },
-    { id: 25, name: 'Calm Waters', icon: '💧', songs: [] },
-    { id: 26, name: 'Tranquil Night', icon: '🌃', songs: [] },
-    { id: 27, name: 'Healing Rain', icon: '🌧️', songs: [] },
-    { id: 28, name: 'Sleepy Town', icon: '🏘️', songs: [] },
-    { id: 29, name: 'Night Whisper', icon: '🤫', songs: [] },
-    { id: 30, name: 'Sleepy Train', icon: '🚂', songs: [] },
-    { id: 31, name: 'Only Music', icon: '🎼', songs: [], isMusic: true }
+    { id: 3, name: 'Gentle Raindrops', icon: '🌧️', songs: [] },
+    { id: 4, name: 'Whispering Pines', icon: '🌲', songs: [] },
+    { id: 5, name: 'Ocean Breeze', icon: '🌊', songs: [] },
+    { id: 6, name: 'Starlight Serenade', icon: '⭐', songs: [] },
+    { id: 7, name: 'Gentle Rain', icon: '🌧️', songs: [] },
+    { id: 8, name: 'Morning Dew', icon: '🌅', songs: [] },
+    { id: 9, name: 'Sunset Glow', icon: '🌇', songs: [] },
+    { id: 10, name: 'Night Owl', icon: '🦉', songs: [] },
+    { id: 11, name: 'Silent Valley', icon: '🏔️', songs: [] },
+    { id: 12, name: 'Forest Walk', icon: '🌳', songs: [] },
+    { id: 13, name: 'River Flow', icon: '🏞️', songs: [] },
+    { id: 14, name: 'Mountain Echo', icon: '⛰️', songs: [] },
+    { id: 15, name: 'Cloud Nine', icon: '☁️', songs: [] },
+    { id: 16, name: 'Breeze of Hope', icon: '🍃', songs: [] },
+    { id: 17, name: 'Peaceful Mind', icon: '☮️', songs: [] },
+    { id: 18, name: 'Harmony', icon: '🎵', songs: [] },
+    { id: 19, name: 'Soft Waves', icon: '🌊', songs: [] },
+    { id: 20, name: 'Evening Calm', icon: '🌆', songs: [] },
+    { id: 21, name: 'Lunar Phase', icon: '🌕', songs: [] },
+    { id: 22, name: 'Deep Sleep', icon: '💤', songs: [] },
+    { id: 23, name: 'Wind Chimes', icon: '🎐', songs: [] },
+    { id: 24, name: 'Starlit Path', icon: '✨', songs: [] },
+    { id: 25, name: 'Dream Weaver', icon: '🌀', songs: [] },
+    { id: 26, name: 'Calm Waters', icon: '💧', songs: [] },
+    { id: 27, name: 'Tranquil Night', icon: '🌃', songs: [] },
+    { id: 28, name: 'Healing Rain', icon: '🌧️', songs: [] },
+    { id: 29, name: 'Sleepy Town', icon: '🏘️', songs: [] },
+    { id: 30, name: 'Night Whisper', icon: '🤫', songs: [] },
+    { id: 31, name: 'Sleepy Train', icon: '🚂', songs: [] },
+    { id: 32, name: 'Only Music', icon: '🎼', songs: [], isMusic: true }
 ];
 
 // ===== Default Songs per Chapter =====
@@ -1056,37 +1057,88 @@ function moveChapter(chapterId, direction) {
     toast('Chapter moved!', 'success');
 }
 
-// ===== Reset Chapter Order to Default =====
-function resetChapterOrder() {
-    if (!confirm('🔄 Reset all chapters to the original order?\n\nYour songs will be kept — only the order will be restored.\n\nCustom chapters (added by you) will be moved to the end.')) return;
+// ===== Original Chapter Order (from screenshot) =====
+const ORIGINAL_CHAPTERS_ORDER = [
+    { name: 'Dreamland Clouds', icon: '☁️' },
+    { name: 'Moonlit Dreams', icon: '🌙' },
+    { name: 'Gentle Raindrops', icon: '🌧️' },
+    { name: 'Whispering Pines', icon: '🌲' },
+    { name: 'Ocean Breeze', icon: '🌊' },
+    { name: 'Starlight Serenade', icon: '⭐' },
+    { name: 'Gentle Rain', icon: '🌧️' },
+    { name: 'Morning Dew', icon: '🌅' },
+    { name: 'Sunset Glow', icon: '🌇' },
+    { name: 'Night Owl', icon: '🦉' },
+    { name: 'Silent Valley', icon: '🏔️' },
+    { name: 'Forest Walk', icon: '🌳' },
+    { name: 'River Flow', icon: '🏞️' },
+    { name: 'Mountain Echo', icon: '⛰️' },
+    { name: 'Cloud Nine', icon: '☁️' },
+    { name: 'Breeze of Hope', icon: '🍃' },
+    { name: 'Peaceful Mind', icon: '☮️' },
+    { name: 'Harmony', icon: '🎵' },
+    { name: 'Soft Waves', icon: '🌊' },
+    { name: 'Evening Calm', icon: '🌆' },
+    { name: 'Lunar Phase', icon: '🌕' },
+    { name: 'Deep Sleep', icon: '💤' },
+    { name: 'Wind Chimes', icon: '🎐' },
+    { name: 'Starlit Path', icon: '✨' },
+    { name: 'Dream Weaver', icon: '🌀' },
+    { name: 'Calm Waters', icon: '💧' },
+    { name: 'Tranquil Night', icon: '🌃' },
+    { name: 'Healing Rain', icon: '🌧️' },
+    { name: 'Sleepy Town', icon: '🏘️' },
+    { name: 'Night Whisper', icon: '🤫' },
+    { name: 'Sleepy Train', icon: '🚂' }
+];
 
-    // Build a map of current chapters by ID (preserve songs)
-    var chaptersMap = {};
+// ===== Reset Chapter Order to Original =====
+function resetChapterOrder() {
+    if (!confirm('🔄 Reset all chapters to the ORIGINAL order from the screenshot?\n\nYour songs will be KEPT — only the order & names will be restored.\n\nCustom chapters will be moved to the end.')) return;
+
+    // Build lookup maps of existing chapters
+    var byId = {};
+    var byName = {};
     chapters.forEach(function(ch) {
-        chaptersMap[ch.id] = ch;
+        byId[ch.id] = ch;
+        byName[ch.name.toLowerCase().trim()] = ch;
     });
 
     var newOrder = [];
     var usedIds = {};
+    var nextId = 1;
 
-    // First: add default chapters in original order (with their current songs)
-    DEFAULT_CHAPTERS.forEach(function(defCh) {
-        if (chaptersMap[defCh.id]) {
-            // Chapter exists — keep it with its songs, update name/icon to default
-            var existing = chaptersMap[defCh.id];
-            existing.name = defCh.name;
-            existing.icon = defCh.icon;
-            newOrder.push(existing);
-        } else {
-            // Chapter was deleted — re-add it empty
-            newOrder.push({ id: defCh.id, name: defCh.name, icon: defCh.icon, songs: [], isMusic: defCh.isMusic || false });
+    // Restore chapters in original order, matching by name first, then by old position
+    ORIGINAL_CHAPTERS_ORDER.forEach(function(orig, idx) {
+        var existing = byName[orig.name.toLowerCase().trim()];
+        
+        // If not found by name, try matching by position (idx+1)
+        if (!existing && byId[idx + 1]) {
+            existing = byId[idx + 1];
         }
-        usedIds[defCh.id] = true;
+        
+        if (existing) {
+            existing.name = orig.name;
+            existing.icon = orig.icon;
+            existing.id = nextId++;
+            newOrder.push(existing);
+            usedIds[existing.id] = true;
+            // Mark old ID as used too
+            for (var oldId in byId) {
+                if (byId[oldId] === existing) usedIds[parseInt(oldId)] = true;
+            }
+        } else {
+            newOrder.push({ id: nextId++, name: orig.name, icon: orig.icon, songs: [] });
+        }
     });
 
-    // Then: add any custom chapters (not in defaults) at the end
+    // Add any custom chapters (not in original list) at the end
     chapters.forEach(function(ch) {
-        if (!usedIds[ch.id]) {
+        var foundInOriginal = ORIGINAL_CHAPTERS_ORDER.some(function(o) {
+            return o.name.toLowerCase().trim() === ch.name.toLowerCase().trim();
+        });
+        if (!foundInOriginal) {
+            ch.id = nextId++;
             newOrder.push(ch);
         }
     });
