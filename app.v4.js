@@ -158,13 +158,14 @@ const API = {
     }
 };
 
-const APP_VERSION = '6.1';
+const APP_VERSION = '8.0';
 
 // ===== Init =====
 document.addEventListener('DOMContentLoaded', () => {
     try {
-        // Clear old data if version changed
+        // Clear old data if version changed — forces fresh load with correct chapter order
         if (localStorage.getItem('app_version') !== APP_VERSION) {
+            localStorage.removeItem('chapters');
             localStorage.setItem('app_version', APP_VERSION);
         }
         createStars();
