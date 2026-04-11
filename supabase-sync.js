@@ -244,6 +244,59 @@
     DB.getSetting('contact_info').then(function(c) { if (c) localStorage.setItem('contact_info', JSON.stringify(c)); }).catch(function(){});
   }
 
+  // ===== 10. Load GitHub token from Supabase (cross-device sync) =====
+  if (supaReady) {
+    (async function() {
+      try {
+        if (!localStorage.getItem('gh_token')) {
+          var tokenResult = await supa.from('settings').select('value').eq('key', 'gh_token').single();
+          if (tokenResult.data && tokenResult.data.value) {
+            localStorage.setItem('gh_token', tokenResult.data.value);
+            console.log('[DB] GitHub token loaded from Supabase');
+          }
+          var repoResult = await supa.from('settings').select('value').eq('key', 'gh_repo').single();
+          if (repoResult.data && repoResult.data.value) {
+            localStorage.setItem('gh_repo', repoResult.data.value);
+            console.log('[DB] GitHub repo loaded from Supabase');
+          }
+        }
+      } catch(e) {
+        console.warn('[DB] Could not load GitHub token from Supabase:', e);
+      }
+    })();
+  }
+
+  // Override saveGithubSettings to sync token to Supabase
+  var _origSaveGithubSettings = window.saveGithubSettings;
+  window.saveGithubSettings = function() {
+    var token = '';
+    var repo = '';
+    try {
+      token = document.getElementById('githubTokenInput').value.trim();
+      repo = document.getElementById('githubRepoInput').value.trim();
+    } catch(e) {}
+
+    if (token) localStorage.setItem('gh_token', token);
+    if (repo) localStorage.setItem('gh_repo', repo);
+
+    if (supaReady && token) {
+      DB.setSetting('gh_token', token).catch(function(e) {
+        console.warn('[DB] Could not sync gh_token:', e);
+      });
+      if (repo) {
+        DB.setSetting('gh_repo', repo).catch(function(e) {
+          console.warn('[DB] Could not sync gh_repo:', e);
+        });
+      }
+      console.log('[DB] GitHub settings synced to Supabase');
+    }
+
+    // Call original function if it exists
+    if (_origSaveGithubSettings && _origSaveGithubSettings !== window.saveGithubSettings) {
+      try { _origSaveGithubSettings(); } catch(e) {}
+    }
+  };
+
   window.DB = DB;
   window.SUPABASE_SYNC = supaReady;
   console.log('[DB] v4.0 Ready — Supabase: ' + (supaReady ? 'ON' : 'OFF'));

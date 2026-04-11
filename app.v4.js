@@ -231,7 +231,20 @@ function initScrollEffects() {
 
 // ===== Load Chapters =====
 async function loadChapters() {
-    // 1. Try loading from static data.json (GitHub raw URL)
+    // ★ FIX: Load localStorage FIRST to preserve songs on refresh
+    const stored = localStorage.getItem('chapters');
+    let localChapters = null;
+    if (stored) {
+        try {
+            const parsed = JSON.parse(stored);
+            if (parsed && parsed.length > 0) {
+                localChapters = parsed;
+            }
+        } catch(e) {}
+    }
+
+    // Try loading data.json for chapter structure updates
+    let jsonChapters = null;
     try {
         var jsonUrl = 'data.json';
         if (location.hostname.includes('github.io')) {
@@ -241,32 +254,48 @@ async function loadChapters() {
         if (res.ok) {
             const data = await res.json();
             if (data.chapters && data.chapters.length > 0) {
-                chapters = data.chapters;
-                saveChaptersLocal();
-                renderChapters();
-                updateStats();
-                return;
+                jsonChapters = data.chapters;
             }
         }
     } catch (e) {
-        console.warn('[Load] data.json not found, trying localStorage');
+        console.warn('[Load] data.json not found');
     }
 
-    // 2. Fallback to localStorage
-    const stored = localStorage.getItem('chapters');
-    if (stored) {
-        try {
-            const parsed = JSON.parse(stored);
-            if (parsed && parsed.length > 0) {
-                chapters = parsed;
-                renderChapters();
-                updateStats();
-                return;
-            }
-        } catch(e) {}
+    // ★ FIX: Smart merge — preserve songs from localStorage
+    if (localChapters && localChapters.length > 0) {
+        chapters = localChapters;
+
+        // If data.json exists, update chapter names/icons but KEEP local songs
+        if (jsonChapters) {
+            jsonChapters.forEach(function(jsonCh) {
+                var localCh = chapters.find(function(c) { return c.id === jsonCh.id; });
+                if (localCh) {
+                    localCh.name = jsonCh.name;
+                    localCh.icon = jsonCh.icon;
+                    // Only use json songs if local has NO songs
+                    if ((!localCh.songs || localCh.songs.length === 0) && jsonCh.songs && jsonCh.songs.length > 0) {
+                        localCh.songs = jsonCh.songs;
+                    }
+                }
+            });
+        }
+
+        saveChaptersLocal();
+        renderChapters();
+        updateStats();
+        return;
     }
 
-    // 3. Last resort: defaults
+    // No localStorage — use data.json or defaults
+    if (jsonChapters) {
+        chapters = jsonChapters;
+        saveChaptersLocal();
+        renderChapters();
+        updateStats();
+        return;
+    }
+
+    // Last resort: defaults
     chapters = JSON.parse(JSON.stringify(DEFAULT_CHAPTERS));
     saveChaptersLocal();
     renderChapters();
@@ -977,6 +1006,8 @@ function renderAdminChapters() {
                     <span class="admin-chapter-songs">${ch.songs.length} song${ch.songs.length !== 1 ? 's' : ''}</span>
                 </div>
                 <div class="admin-chapter-actions">
+                    <button class="btn btn-sm btn-secondary" onclick="event.stopPropagation(); moveChapter(${ch.id}, -1)" title="Move Up">⬆️</button>
+                    <button class="btn btn-sm btn-secondary" onclick="event.stopPropagation(); moveChapter(${ch.id}, 1)" title="Move Down">⬇️</button>
                     <button class="btn btn-sm btn-secondary" onclick="event.stopPropagation(); showRenameChapter(${ch.id})" title="Rename">✏️</button>
                     <button class="btn btn-sm btn-primary" onclick="event.stopPropagation(); showAddSong(${ch.id})">➕ Add Song</button>
                     <button class="btn btn-sm btn-danger" onclick="event.stopPropagation(); deleteChapter(${ch.id})" title="Delete Chapter">🗑️</button>
@@ -1005,6 +1036,23 @@ function renderAdminChapters() {
 function toggleChapterSongs(chapterId) {
     const el = document.getElementById(`songs-${chapterId}`);
     el.classList.toggle('open');
+}
+
+// ===== Chapter Reorder =====
+function moveChapter(chapterId, direction) {
+    var idx = chapters.findIndex(function(c) { return c.id === chapterId; });
+    if (idx === -1) return;
+    var newIdx = idx + direction;
+    if (newIdx < 0 || newIdx >= chapters.length) {
+        toast(direction < 0 ? 'Already at the top!' : 'Already at the bottom!', 'info');
+        return;
+    }
+    var temp = chapters[idx];
+    chapters[idx] = chapters[newIdx];
+    chapters[newIdx] = temp;
+    saveChaptersLocal();
+    renderAdminChapters();
+    toast('Chapter moved!', 'success');
 }
 
 // ===== Chapter CRUD =====
@@ -1367,6 +1415,17 @@ async function saveGithubSettings() {
 
         statusEl.innerHTML = '<span style="color:#4caf50">✅ Connected! You can now upload songs directly.</span>';
         toast('GitHub settings saved!', 'success');
+
+        // ★ Sync token to Supabase for cross-device access
+        if (typeof DB !== 'undefined' && window.SUPABASE_SYNC) {
+            try {
+                await DB.setSetting('gh_token', token);
+                await DB.setSetting('gh_repo', repoFull);
+                console.log('[GitHub] Token synced to Supabase for all devices');
+            } catch(e) {
+                console.warn('[GitHub] Could not sync token to Supabase:', e);
+            }
+        }
 
         // Create folders if they don't exist
         await ensureGithubFolders(token, owner, repo);
