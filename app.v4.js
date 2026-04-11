@@ -996,6 +996,7 @@ function renderAdminChapters() {
         <div class="admin-chapters-add-bar">
             <button class="btn btn-primary btn-sm" onclick="showAddChapter()">➕ Add New Chapter</button>
             <button class="btn btn-secondary btn-sm" onclick="removeEmptyChapters()">🧹 Remove Empty</button>
+            <button class="btn btn-secondary btn-sm" onclick="resetChapterOrder()">🔄 Reset Order</button>
         </div>
     ` + chapters.map(ch => `
         <div class="admin-chapter-item">
@@ -1053,6 +1054,48 @@ function moveChapter(chapterId, direction) {
     saveChaptersLocal();
     renderAdminChapters();
     toast('Chapter moved!', 'success');
+}
+
+// ===== Reset Chapter Order to Default =====
+function resetChapterOrder() {
+    if (!confirm('🔄 Reset all chapters to the original order?\n\nYour songs will be kept — only the order will be restored.\n\nCustom chapters (added by you) will be moved to the end.')) return;
+
+    // Build a map of current chapters by ID (preserve songs)
+    var chaptersMap = {};
+    chapters.forEach(function(ch) {
+        chaptersMap[ch.id] = ch;
+    });
+
+    var newOrder = [];
+    var usedIds = {};
+
+    // First: add default chapters in original order (with their current songs)
+    DEFAULT_CHAPTERS.forEach(function(defCh) {
+        if (chaptersMap[defCh.id]) {
+            // Chapter exists — keep it with its songs, update name/icon to default
+            var existing = chaptersMap[defCh.id];
+            existing.name = defCh.name;
+            existing.icon = defCh.icon;
+            newOrder.push(existing);
+        } else {
+            // Chapter was deleted — re-add it empty
+            newOrder.push({ id: defCh.id, name: defCh.name, icon: defCh.icon, songs: [], isMusic: defCh.isMusic || false });
+        }
+        usedIds[defCh.id] = true;
+    });
+
+    // Then: add any custom chapters (not in defaults) at the end
+    chapters.forEach(function(ch) {
+        if (!usedIds[ch.id]) {
+            newOrder.push(ch);
+        }
+    });
+
+    chapters = newOrder;
+    saveChaptersLocal();
+    renderAdminChapters();
+    updateStats();
+    toast('✅ Chapter order restored to original!', 'success');
 }
 
 // ===== Chapter CRUD =====
