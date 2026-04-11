@@ -158,16 +158,110 @@ const API = {
     }
 };
 
-const APP_VERSION = '9.0';
+const APP_VERSION = '9.1';
+
+
+// ===== Chapter Structure (for smart sync) =====
+const CHAPTER_STRUCTURE = [
+    { id: 1, name: 'Dreamland Clouds', icon: '☁️' },
+    { id: 2, name: 'Moonlit Dreams', icon: '🌙' },
+    { id: 3, name: 'Gentle Raindrops', icon: '🌧️' },
+    { id: 4, name: 'Starry Night', icon: '⭐' },
+    { id: 5, name: 'Butterfly Dreams', icon: '🦋' },
+    { id: 6, name: 'Forest Whispers', icon: '🌲' },
+    { id: 7, name: 'Dreamy Waves', icon: '🌊' },
+    { id: 8, name: 'Cozy Cabin', icon: '🏠' },
+    { id: 9, name: 'Silky Clouds', icon: '☁️' },
+    { id: 10, name: 'Meadow Breeze', icon: '🍃' },
+    { id: 11, name: 'Little Fireflies', icon: '✨' },
+    { id: 12, name: 'Gentle Snowflakes', icon: '❄️' },
+    { id: 13, name: 'The Quiet Stream', icon: '🏞️' },
+    { id: 14, name: 'Autumn Leaves', icon: '🍂' },
+    { id: 15, name: 'Happy Kittens', icon: '🐱' },
+    { id: 16, name: 'Moonlit Garden', icon: '🌺' },
+    { id: 17, name: 'Dreamy Nights', icon: '🌃' },
+    { id: 18, name: 'Little Stars', icon: '🌟' },
+    { id: 19, name: 'Teddy Bear Dreams', icon: '🧸' },
+    { id: 20, name: 'Soft Rain', icon: '🌧️' },
+    { id: 21, name: 'Sweet Butterfly', icon: '🦋' },
+    { id: 22, name: 'The Dreamland Train', icon: '🚂' },
+    { id: 23, name: 'Ocean Waves', icon: '🌊' },
+    { id: 24, name: 'Soft Clouds', icon: '☁️' },
+    { id: 25, name: 'Nighttime Fireflies', icon: '✨' },
+    { id: 26, name: 'Magical Moonlight', icon: '🌕' },
+    { id: 27, name: 'Cozy Blanket', icon: '🛏️' },
+    { id: 28, name: 'Starry Night', icon: '⭐' },
+    { id: 29, name: 'Gentle Rain', icon: '🌧️' },
+    { id: 30, name: 'Sleepy Train', icon: '🚂' },
+    { id: 31, name: 'Only Music', icon: '🎼', isMusic: true },
+    { id: 32, name: 'Only Music 2', icon: '🎼', isMusic: true }
+];
+
+// ===== Smart Chapter Structure Sync =====
+function syncChapterStructure() {
+    try {
+        var stored = localStorage.getItem('chapters');
+        if (!stored) return;
+        var localChapters = JSON.parse(stored);
+        if (!Array.isArray(localChapters) || localChapters.length === 0) return;
+        var changed = false;
+        CHAPTER_STRUCTURE.forEach(function(def) {
+            var local = localChapters.find(function(c) { return c.id === def.id; });
+            if (local) {
+                if (local.name !== def.name) { local.name = def.name; changed = true; }
+                if (local.icon !== def.icon) { local.icon = def.icon; changed = true; }
+                if (local.isMusic !== def.isMusic) { local.isMusic = def.isMusic; changed = true; }
+            }
+        });
+        CHAPTER_STRUCTURE.forEach(function(def) {
+            var exists = localChapters.find(function(c) { return c.id === def.id; });
+            if (!exists) {
+                localChapters.push({ id: def.id, name: def.name, icon: def.icon, songs: [], isMusic: def.isMusic || false });
+                changed = true;
+            }
+        });
+        if (changed) {
+            localStorage.setItem('chapters', JSON.stringify(localChapters));
+            console.log('[Sync] Chapter structure updated, songs preserved');
+        }
+    } catch(e) { console.warn('[Sync] Structure sync failed:', e); }
+}
+
+// ===== Auto-Backup System =====
+function backupChapters() {
+    try {
+        var data = localStorage.getItem('chapters');
+        if (data) {
+            localStorage.setItem('chapters_backup', data);
+            localStorage.setItem('chapters_backup_time', Date.now().toString());
+        }
+    } catch(e) {}
+}
+
+function restoreFromBackup() {
+    try {
+        var backup = localStorage.getItem('chapters_backup');
+        if (backup) {
+            var chapters = JSON.parse(backup);
+            if (Array.isArray(chapters) && chapters.length > 0) {
+                var hasSongs = chapters.some(function(c) { return c.songs && c.songs.length > 0; });
+                if (hasSongs) {
+                    localStorage.setItem('chapters', backup);
+                    console.log('[Backup] Restored from backup');
+                    return true;
+                }
+            }
+        }
+    } catch(e) {}
+    return false;
+}
 
 // ===== Init =====
 document.addEventListener('DOMContentLoaded', () => {
     try {
-        // Clear old data if version changed — forces fresh load with correct chapter order
-        if (localStorage.getItem('app_version') !== APP_VERSION) {
-            localStorage.removeItem('chapters');
-            localStorage.setItem('app_version', APP_VERSION);
-        }
+        // ★ FIX: Smart structure sync — NEVER wipe songs
+        syncChapterStructure();
+        setTimeout(function() { backupChapters(); }, 2000);
         createStars();
         loadChapters();
         loadContactInfo();
@@ -233,7 +327,7 @@ function initScrollEffects() {
 
 // ===== Load Chapters =====
 async function loadChapters() {
-    // ★ FIX: Load localStorage FIRST to preserve songs on refresh
+    // ★ FIX: Load localStorage FIRST — songs always win
     const stored = localStorage.getItem('chapters');
     let localChapters = null;
     if (stored) {
@@ -242,7 +336,20 @@ async function loadChapters() {
             if (parsed && parsed.length > 0) {
                 localChapters = parsed;
             }
-        } catch(e) {}
+        } catch(e) {
+            console.warn('[Load] localStorage parse error:', e);
+        }
+    }
+
+    // ★ FIX: If localStorage is empty/corrupt, try backup first
+    if (!localChapters) {
+        console.log('[Load] localStorage empty, trying backup...');
+        if (restoreFromBackup()) {
+            try {
+                var backupData = localStorage.getItem('chapters');
+                if (backupData) localChapters = JSON.parse(backupData);
+            } catch(e) {}
+        }
     }
 
     // Try loading data.json for chapter structure updates
@@ -267,17 +374,23 @@ async function loadChapters() {
     if (localChapters && localChapters.length > 0) {
         chapters = localChapters;
 
-        // If data.json exists, update chapter names/icons but KEEP local songs
+        // If data.json exists, update ONLY names/icons — NEVER touch songs
         if (jsonChapters) {
             jsonChapters.forEach(function(jsonCh) {
                 var localCh = chapters.find(function(c) { return c.id === jsonCh.id; });
                 if (localCh) {
+                    // Update metadata from data.json
                     localCh.name = jsonCh.name;
                     localCh.icon = jsonCh.icon;
-                    // Only use json songs if local has NO songs
-                    if ((!localCh.songs || localCh.songs.length === 0) && jsonCh.songs && jsonCh.songs.length > 0) {
+                    if (jsonCh.isMusic !== undefined) localCh.isMusic = jsonCh.isMusic;
+                    // ★ CRITICAL: Only populate songs from json if local is EMPTY and json HAS songs
+                    if ((!localCh.songs || localCh.songs.length === 0)
+                        && jsonCh.songs
+                        && Array.isArray(jsonCh.songs)
+                        && jsonCh.songs.length > 0) {
                         localCh.songs = jsonCh.songs;
                     }
+                    // Otherwise: NEVER overwrite local songs
                 }
             });
         }
@@ -305,7 +418,15 @@ async function loadChapters() {
 }
 
 function saveChaptersLocal() {
-    localStorage.setItem('chapters', JSON.stringify(chapters));
+    try {
+        localStorage.setItem('chapters', JSON.stringify(chapters));
+        localStorage.setItem('chapters_backup', JSON.stringify(chapters));
+        localStorage.setItem('chapters_backup_time', Date.now().toString());
+    } catch(e) {
+        console.error('[Save] localStorage error:', e);
+        try { localStorage.setItem('chapters_backup', JSON.stringify(chapters)); } catch(e2) {}
+        toast('Warning: Could not save to storage.', 'error');
+    }
 }
 
 // ===== Contact Info =====

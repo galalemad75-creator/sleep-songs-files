@@ -1,5 +1,6 @@
-/**
- * SLEEP SONGS — SUPABASE SYNC (v4.0 BULLETPROOF)
+/* ===== Sleep Songs - SUPABASE SYNC (FIXED v4.1) =====
+ * Non-destructive sync: ONLY pushes data UP to Supabase.
+ * NEVER overwrites local data from Supabase.
  * Everything wrapped in try-catch. NEVER crashes the page.
  */
 (async function () {
@@ -137,7 +138,7 @@
   window.convertUrl = function(url) {
     if (!url) return url;
     if (url.indexOf('drive.google.com') !== -1) {
-      var m = url.match(/\/d\/([a-zA-Z0-9_-]+)/);
+      var m = url.match(/\\/d\\/([a-zA-Z0-9_-]+)/);
       if (m) return 'https://drive.google.com/uc?export=download&id=' + m[1];
       var p = new URLSearchParams((url.split('?')[1] || ''));
       var id = p.get('id');
@@ -149,60 +150,62 @@
     return url;
   };
 
-  // ===== 5. SAFE loadChapters override =====
-  var _origLoadChapters = window.loadChapters;
+  // ===== 5. SUPABASE SYNC (NON-DESTRUCTIVE) =====
+  // ★ FIX: DON'T override loadChapters — let app.v4.js handle loading
+  // Only sync Supabase in the background for cross-device support
+  // Local data is ALWAYS the source of truth
 
-  window.loadChapters = function() {
-    // If already loaded with data, just sync
-    if (window.chapters && Array.isArray(window.chapters) && window.chapters.length > 0) {
-      var hasData = window.chapters.some(function(ch) { return ch.songs && ch.songs.length > 0; });
-      if (hasData) {
-        // Sync to Supabase in background
-        if (supaReady) {
-          window.chapters.forEach(function(ch) { DB.saveChapter(ch).catch(function(){}); });
-        }
-        return; // Don't re-render, data is already there
-      }
-    }
+  var _origSaveChaptersLocal = window.saveChaptersLocal;
 
-    // Try Supabase
-    if (supaReady) {
-      DB.loadChapters().then(function(sbChapters) {
-        if (sbChapters && sbChapters.length > 0) {
-          var localHasSongs = window.chapters && window.chapters.some(function(ch) { return ch.songs && ch.songs.length > 0; });
-          var sbHasSongs = sbChapters.some(function(ch) { return ch.songs && ch.songs.length > 0; });
-
-          // Only use Supabase data if it has songs OR local has no songs
-          if (sbHasSongs || !localHasSongs) {
-            window.chapters = sbChapters;
-            try { localStorage.setItem('chapters', JSON.stringify(window.chapters)); } catch(e) {}
-          } else {
-            // Local has songs, Supabase doesn't — sync local UP
-            window.chapters.forEach(function(ch) { DB.saveChapter(ch).catch(function(){}); });
-          }
-          if (typeof renderChapters === 'function') renderChapters();
-          if (typeof updateStats === 'function') updateStats();
-        }
-      }).catch(function(e) {
-        console.warn('[DB] Load error:', e);
-      });
-      return; // Original loadChapters already ran, don't duplicate
-    }
-  };
-
-  // ===== 6. Override saveChaptersLocal =====
+  // Override saveChaptersLocal to ALSO save to Supabase
   window.saveChaptersLocal = function() {
+    // Save to localStorage + backup (original behavior)
     try {
       localStorage.setItem('chapters', JSON.stringify(window.chapters));
+      localStorage.setItem('chapters_backup', JSON.stringify(window.chapters));
+      localStorage.setItem('chapters_backup_time', Date.now().toString());
     } catch(e) {
-      console.error('[DB] localStorage full!', e);
+      console.error('[DB] localStorage save error:', e);
+      try { localStorage.setItem('chapters_backup', JSON.stringify(window.chapters)); } catch(e2) {}
     }
-    if (supaReady && window.chapters) {
-      window.chapters.forEach(function(ch) { DB.saveChapter(ch).catch(function(){}); });
+    
+    // Sync to Supabase in background (fire-and-forget, never block UI)
+    if (supaReady && window.chapters && Array.isArray(window.chapters)) {
+      window.chapters.forEach(function(ch) {
+        DB.saveChapter(ch).catch(function(e) {
+          console.warn('[DB] Supabase sync error for chapter', ch.id);
+        });
+      });
     }
   };
 
-  // ===== 7. Settings overrides =====
+  // Background sync: periodically push local data to Supabase
+  if (supaReady) {
+    // On startup: push local chapters UP to Supabase (local is source of truth)
+    setTimeout(function() {
+      if (window.chapters && Array.isArray(window.chapters)) {
+        var hasSongs = window.chapters.some(function(ch) { return ch.songs && ch.songs.length > 0; });
+        if (hasSongs) {
+          console.log('[DB] Syncing local chapters to Supabase...');
+          window.chapters.forEach(function(ch) {
+            DB.saveChapter(ch).catch(function(){});
+          });
+        }
+      }
+    }, 3000);
+    
+    // Periodic background sync every 5 minutes
+    setInterval(function() {
+      if (window.chapters && Array.isArray(window.chapters)) {
+        console.log('[DB] Periodic sync to Supabase...');
+        window.chapters.forEach(function(ch) {
+          DB.saveChapter(ch).catch(function(){});
+        });
+      }
+    }, 300000);
+  }
+
+  // ===== 6. Settings overrides =====
   window.savePlayCounts = function() {
     try { localStorage.setItem('playCounts', JSON.stringify(window.playCounts || {})); } catch(e) {}
     if (supaReady) DB.setSetting('play_counts', window.playCounts || {}).catch(function(){});
@@ -213,7 +216,7 @@
     if (supaReady) DB.setSetting('favorites', window.favorites || {}).catch(function(){});
   };
 
-  // ===== 8. SAFE cleanup — only stale base64 =====
+  // ===== 7. SAFE cleanup — only stale base64 =====
   try {
     var stored = localStorage.getItem('chapters');
     if (stored) {
@@ -238,71 +241,17 @@
     }
   } catch(e) {}
 
-  // ===== 9. Load settings from Supabase =====
+  // ===== 8. Load settings from Supabase =====
   if (supaReady) {
     DB.getSetting('ad_settings').then(function(a) { if (a) localStorage.setItem('ad_settings', JSON.stringify(a)); }).catch(function(){});
-    DB.getSetting('contact_info').then(function(c) { if (c) localStorage.setItem('contact_info', JSON.stringify(c)); }).catch(function(){});
+    DB.getSetting('play_counts').then(function(a) { if (a) { window.playCounts = a; } }).catch(function(){});
+    DB.getSetting('favorites').then(function(a) { if (a) { window.favorites = a; } }).catch(function(){});
   }
 
-  // ===== 10. Load GitHub token from Supabase (cross-device sync) =====
-  if (supaReady) {
-    (async function() {
-      try {
-        if (!localStorage.getItem('gh_token')) {
-          var tokenResult = await supa.from('settings').select('value').eq('key', 'gh_token').single();
-          if (tokenResult.data && tokenResult.data.value) {
-            localStorage.setItem('gh_token', tokenResult.data.value);
-            console.log('[DB] GitHub token loaded from Supabase');
-          }
-          var repoResult = await supa.from('settings').select('value').eq('key', 'gh_repo').single();
-          if (repoResult.data && repoResult.data.value) {
-            localStorage.setItem('gh_repo', repoResult.data.value);
-            console.log('[DB] GitHub repo loaded from Supabase');
-          }
-        }
-      } catch(e) {
-        console.warn('[DB] Could not load GitHub token from Supabase:', e);
-      }
-    })();
-  }
+  // Export for admin panel
+  window.SUPABASE_SYNC = { DB: DB, ready: function() { return supaReady; } };
 
-  // Override saveGithubSettings to sync token to Supabase
-  var _origSaveGithubSettings = window.saveGithubSettings;
-  window.saveGithubSettings = function() {
-    var token = '';
-    var repo = '';
-    try {
-      token = document.getElementById('githubTokenInput').value.trim();
-      repo = document.getElementById('githubRepoInput').value.trim();
-    } catch(e) {}
-
-    if (token) localStorage.setItem('gh_token', token);
-    if (repo) localStorage.setItem('gh_repo', repo);
-
-    if (supaReady && token) {
-      DB.setSetting('gh_token', token).catch(function(e) {
-        console.warn('[DB] Could not sync gh_token:', e);
-      });
-      if (repo) {
-        DB.setSetting('gh_repo', repo).catch(function(e) {
-          console.warn('[DB] Could not sync gh_repo:', e);
-        });
-      }
-      console.log('[DB] GitHub settings synced to Supabase');
-    }
-
-    // Call original function if it exists
-    if (_origSaveGithubSettings && _origSaveGithubSettings !== window.saveGithubSettings) {
-      try { _origSaveGithubSettings(); } catch(e) {}
-    }
-  };
-
-  window.DB = DB;
-  window.SUPABASE_SYNC = supaReady;
-  console.log('[DB] v4.0 Ready — Supabase: ' + (supaReady ? 'ON' : 'OFF'));
-
-  } catch (FATAL) {
-    // ===== CATCH EVERYTHING — NEVER CRASH THE PAGE =====
-    console.error('[DB] Fatal error (non-critical):', FATAL);
+  } catch(e) {
+    console.warn('[DB] supabase-sync init failed:', e);
   }
 })();
