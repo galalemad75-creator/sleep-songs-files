@@ -2416,7 +2416,7 @@ li {
     backdrop-filter: blur(24px);
     border: 1px solid var(--primary, #7c3aed);
     border-radius: 16px;
-    z-index: 10000;
+    z-index: 10002;
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4), 0 0 20px rgba(124, 58, 237, 0.15);
     display: none;
     overflow: hidden;

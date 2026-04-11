@@ -848,38 +848,79 @@ function addAllFromChapter() {
 }
 
 function nextTrack() {
+    // Playlist mode: next in playlist (loop)
     if (isPlaylistMode && playlist.length > 0) {
         const next = playlistIndex + 1;
         if (next < playlist.length) playFromPlaylist(next);
         else playFromPlaylist(0);
         return;
     }
+    // Chapter mode: cross-chapter navigation
     if (!currentChapter) return;
-    const next = currentSongIndex + 1;
-    if (next < currentChapter.songs.length) playSong(next);
+    if (currentSongIndex + 1 < currentChapter.songs.length) {
+        playSong(currentSongIndex + 1);
+        return;
+    }
+    // End of chapter → jump to next chapter
+    const chIdx = chapters.findIndex(c => c.id === currentChapter.id);
+    for (let i = chIdx + 1; i < chapters.length; i++) {
+        if (chapters[i].songs && chapters[i].songs.length > 0) {
+            currentChapter = chapters[i];
+            openChapter(currentChapter.id);
+            setTimeout(function() { playSong(0); }, 100);
+            return;
+        }
+    }
 }
 
 function prevTrack() {
+    // Playlist mode: prev in playlist (loop)
     if (isPlaylistMode && playlist.length > 0) {
         const prev = playlistIndex - 1;
         if (prev >= 0) playFromPlaylist(prev);
         else playFromPlaylist(playlist.length - 1);
         return;
     }
+    // Chapter mode: cross-chapter navigation
     if (!currentChapter) return;
-    const prev = currentSongIndex - 1;
-    if (prev >= 0) playSong(prev);
+    if (currentSongIndex > 0) {
+        playSong(currentSongIndex - 1);
+        return;
+    }
+    // Start of chapter → jump to previous chapter
+    const chIdx = chapters.findIndex(c => c.id === currentChapter.id);
+    for (let i = chIdx - 1; i >= 0; i--) {
+        if (chapters[i].songs && chapters[i].songs.length > 0) {
+            currentChapter = chapters[i];
+            openChapter(currentChapter.id);
+            setTimeout(function() { playSong(currentChapter.songs.length - 1); }, 100);
+            return;
+        }
+    }
 }
 
 function togglePlaylistPanel() {
     const panel = document.getElementById('playlistPanel');
     if (!panel) return;
-    panel.style.display = (panel.style.display === 'none' || !panel.style.display) ? 'block' : 'none';
+    const isHidden = panel.style.display === 'none' || !panel.style.display || panel.style.visibility === 'hidden';
+    if (isHidden) {
+        panel.style.display = 'block';
+        panel.style.visibility = 'visible';
+        panel.style.opacity = '1';
+        // Re-render to ensure content is fresh
+        if (playlist.length > 0) renderPlaylist();
+    } else {
+        panel.style.display = 'none';
+    }
 }
 
 function showPlaylistPanel() {
     const panel = document.getElementById('playlistPanel');
-    if (panel) panel.style.display = 'block';
+    if (panel) {
+        panel.style.display = 'block';
+        panel.style.visibility = 'visible';
+        panel.style.opacity = '1';
+    }
 }
 
 function renderPlaylist() {
@@ -902,6 +943,9 @@ function renderPlaylist() {
         container.style.display = 'none';
         return;
     }
+    container.style.display = 'block';
+    container.style.visibility = 'visible';
+    container.style.opacity = '1';
     container.innerHTML = '<div class="playlist-header"><span>🎵 Playlist (' + playlist.length + ' songs)</span><div class="playlist-header-actions"><button class="playlist-action-btn" onclick="clearPlaylist()" title="Clear All">🗑️</button><button class="playlist-close-btn" onclick="togglePlaylistPanel()" title="Close">✕</button></div></div><div class="playlist-list">' + playlist.map(function(song, idx) {
         var isPlaying = isPlaylistMode && idx === playlistIndex;
         return '<div class="playlist-item ' + (isPlaying ? 'playing' : '') + '"><div class="playlist-item-main" onclick="playFromPlaylist(' + idx + ')"><img src="' + (song.image || 'data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect fill=%22%231A1744%22 width=%22100%22 height=%22100%22/><text x=%2250%22 y=%2260%22 text-anchor=%22middle%22 font-size=%2240%22>🎵</text></svg>') + '" class="playlist-item-img" alt=""><div class="playlist-item-info"><div class="playlist-item-title">' + (isPlaying ? '▶ ' : '') + song.title + '</div><div class="playlist-item-chapter">' + (song.chapterName || '') + '</div></div></div><div class="playlist-item-actions">' + (idx > 0 ? '<button class="playlist-move-btn" onclick="event.stopPropagation(); moveInPlaylist(' + idx + ',' + (idx-1) + ')" title="Move Up">▲</button>' : '') + (idx < playlist.length - 1 ? '<button class="playlist-move-btn" onclick="event.stopPropagation(); moveInPlaylist(' + idx + ',' + (idx+1) + ')" title="Move Down">▼</button>' : '') + '<button class="playlist-remove-btn" onclick="event.stopPropagation(); removeFromPlaylist(' + idx + ')" title="Remove">✕</button></div></div>';
