@@ -27,38 +27,184 @@
         }
       ]
     },
-    { "id": 3, "name": "Gentle Raindrops", "icon": "🌧️", "songs": [] },
-    { "id": 4, "name": "Whispering Pines", "icon": "🌲", "songs": [] },
-    { "id": 5, "name": "Ocean Breeze", "icon": "🌊", "songs": [] },
-    { "id": 6, "name": "Starlight Serenade", "icon": "⭐", "songs": [] },
-    { "id": 7, "name": "Gentle Rain", "icon": "🌧️", "songs": [] },
-    { "id": 8, "name": "Morning Dew", "icon": "🌅", "songs": [] },
-    { "id": 9, "name": "Sunset Glow", "icon": "🌇", "songs": [] },
-    { "id": 10, "name": "Night Owl", "icon": "🦉", "songs": [] },
-    { "id": 11, "name": "Silent Valley", "icon": "🏔️", "songs": [] },
-    { "id": 12, "name": "Forest Walk", "icon": "🌳", "songs": [] },
-    { "id": 13, "name": "River Flow", "icon": "🏞️", "songs": [] },
-    { "id": 14, "name": "Mountain Echo", "icon": "⛰️", "songs": [] },
-    { "id": 15, "name": "Cloud Nine", "icon": "☁️", "songs": [] },
-    { "id": 16, "name": "Breeze of Hope", "icon": "🍃", "songs": [] },
-    { "id": 17, "name": "Peaceful Mind", "icon": "☮️", "songs": [] },
-    { "id": 18, "name": "Harmony", "icon": "🎵", "songs": [] },
-    { "id": 19, "name": "Soft Waves", "icon": "🌊", "songs": [] },
-    { "id": 20, "name": "Evening Calm", "icon": "🌆", "songs": [] },
-    { "id": 21, "name": "Lunar Phase", "icon": "🌕", "songs": [] },
-    { "id": 22, "name": "Deep Sleep", "icon": "💤", "songs": [] },
-    { "id": 23, "name": "Wind Chimes", "icon": "🎐", "songs": [] },
-    { "id": 24, "name": "Starlit Path", "icon": "✨", "songs": [] },
-    { "id": 25, "name": "Dream Weaver", "icon": "🌀", "songs": [] },
-    { "id": 26, "name": "Calm Waters", "icon": "💧", "songs": [] },
-    { "id": 27, "name": "Tranquil Night", "icon": "🌃", "songs": [] },
-    { "id": 28, "name": "Healing Rain", "icon": "🌧️", "songs": [] },
-    { "id": 29, "name": "Sleepy Town", "icon": "🏘️", "songs": [] },
-    { "id": 30, "name": "Night Whisper", "icon": "🤫", "songs": [] },
-    { "id": 31, "name": "Sleepy Train", "icon": "🚂", "songs": [] },
+    {
+      "id": 3,
+      "name": "Gentle Raindrops",
+      "icon": "🌧️",
+      "songs": []
+    },
+    {
+      "id": 4,
+      "name": "Starry Night",
+      "icon": "⭐",
+      "songs": []
+    },
+    {
+      "id": 5,
+      "name": "Butterfly Dreams",
+      "icon": "🦋",
+      "songs": []
+    },
+    {
+      "id": 6,
+      "name": "Forest Whispers",
+      "icon": "🌲",
+      "songs": []
+    },
+    {
+      "id": 7,
+      "name": "Dreamy Waves",
+      "icon": "🌊",
+      "songs": []
+    },
+    {
+      "id": 8,
+      "name": "Cozy Cabin",
+      "icon": "🏠",
+      "songs": []
+    },
+    {
+      "id": 9,
+      "name": "Silky Clouds",
+      "icon": "☁️",
+      "songs": []
+    },
+    {
+      "id": 10,
+      "name": "Meadow Breeze",
+      "icon": "🍃",
+      "songs": []
+    },
+    {
+      "id": 11,
+      "name": "Little Fireflies",
+      "icon": "✨",
+      "songs": []
+    },
+    {
+      "id": 12,
+      "name": "Gentle Snowflakes",
+      "icon": "❄️",
+      "songs": []
+    },
+    {
+      "id": 13,
+      "name": "The Quiet Stream",
+      "icon": "🏞️",
+      "songs": []
+    },
+    {
+      "id": 14,
+      "name": "Autumn Leaves",
+      "icon": "🍂",
+      "songs": []
+    },
+    {
+      "id": 15,
+      "name": "Happy Kittens",
+      "icon": "🐱",
+      "songs": []
+    },
+    {
+      "id": 16,
+      "name": "Moonlit Garden",
+      "icon": "🌺",
+      "songs": []
+    },
+    {
+      "id": 17,
+      "name": "Dreamy Nights",
+      "icon": "🌃",
+      "songs": []
+    },
+    {
+      "id": 18,
+      "name": "Little Stars",
+      "icon": "🌟",
+      "songs": []
+    },
+    {
+      "id": 19,
+      "name": "Teddy Bear Dreams",
+      "icon": "🧸",
+      "songs": []
+    },
+    {
+      "id": 20,
+      "name": "Soft Rain",
+      "icon": "🌧️",
+      "songs": []
+    },
+    {
+      "id": 21,
+      "name": "Sweet Butterfly",
+      "icon": "🦋",
+      "songs": []
+    },
+    {
+      "id": 22,
+      "name": "The Dreamland Train",
+      "icon": "🚂",
+      "songs": []
+    },
+    {
+      "id": 23,
+      "name": "Ocean Waves",
+      "icon": "🌊",
+      "songs": []
+    },
+    {
+      "id": 24,
+      "name": "Soft Clouds",
+      "icon": "☁️",
+      "songs": []
+    },
+    {
+      "id": 25,
+      "name": "Nighttime Fireflies",
+      "icon": "✨",
+      "songs": []
+    },
+    {
+      "id": 26,
+      "name": "Magical Moonlight",
+      "icon": "🌕",
+      "songs": []
+    },
+    {
+      "id": 27,
+      "name": "Cozy Blanket",
+      "icon": "🛏️",
+      "songs": []
+    },
+    {
+      "id": 28,
+      "name": "Starry Night",
+      "icon": "⭐",
+      "songs": []
+    },
+    {
+      "id": 29,
+      "name": "Gentle Rain",
+      "icon": "🌧️",
+      "songs": []
+    },
+    {
+      "id": 30,
+      "name": "Sleepy Train",
+      "icon": "🚂",
+      "songs": []
+    },
+    {
+      "id": 31,
+      "name": "Only Music",
+      "icon": "🎼",
+      "songs": [],
+      "isMusic": true
+    },
     {
       "id": 32,
-      "name": "Only Music",
+      "name": "Only Music 2",
       "icon": "🎼",
       "songs": [],
       "isMusic": true
