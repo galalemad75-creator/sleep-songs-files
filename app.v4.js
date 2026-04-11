@@ -534,22 +534,23 @@ function openChapter(chapterId) {
                         const songId = song.id || song.title;
                         const liked = isFavorite(songId);
                         return `
-                        <div class="song-card " id="song-card-${idx}">
-                            <div class="song-card-click" onclick="playSong(${idx})">
+                        <div class="song-card" id="song-card-${idx}">
+                            <div class="song-card-img-wrap" onclick="playSong(${idx})">
                                 <img src="${song.image || 'data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect fill=%22%231A1744%22 width=%22100%22 height=%22100%22/><text x=%2250%22 y=%2260%22 text-anchor=%22middle%22 font-size=%2240%22>🎵</text></svg>'}" 
                                      alt="${song.title}" class="song-image" loading="lazy">
-                                <div class="song-info">
-                                    <div class="song-title">${song.title}</div>
-                                    <div class="song-meta">${currentChapter.name}</div>
-                                </div>
-                                <div class="song-play-icon">▶</div>
+                                <div class="song-play-overlay">▶</div>
                             </div>
-                            <div class="song-card-actions">
-                                <button class="add-playlist-btn" onclick="event.stopPropagation(); addToPlaylistBtn(${currentChapter.id}, ${idx})" title="Add to Playlist">📋</button>
-                                <button class="like-btn ${liked ? 'liked' : ''}" data-id="${songId}"
-                                        onclick="event.stopPropagation(); toggleFavorite('${songId}')">
-                                    ${liked ? '❤️' : '🤍'}
-                                </button>
+                            <div class="song-card-bottom">
+                                <div class="song-info" onclick="playSong(${idx})">
+                                    <div class="song-title">${song.title}</div>
+                                </div>
+                                <div class="song-card-actions">
+                                    <button class="add-playlist-btn" onclick="event.stopPropagation(); addToPlaylistBtn(${currentChapter.id}, ${idx})" title="Add to Playlist">📋</button>
+                                    <button class="like-btn ${liked ? 'liked' : ''}" data-id="${songId}"
+                                            onclick="event.stopPropagation(); toggleFavorite('${songId}')">
+                                        ${liked ? '❤️' : '🤍'}
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     `;}).join('')}
