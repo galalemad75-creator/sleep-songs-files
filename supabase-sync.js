@@ -21,7 +21,7 @@
       document.head.appendChild(s);
       await new Promise((r, j) => { s.onload = r; s.onerror = j; });
       supa = window.supabase.createClient(SB_URL, SB_KEY);
-      await supa.from('chapters').select('id').limit(1);
+      await supa.from(typeof SITE_ID!=='undefined'&&SITE_ID?SITE_ID+'_chapters':'chapters').select('id').limit(1);
       supaReady = true;
       console.log('[DB] Supabase connected');
     } catch (e) {
@@ -32,7 +32,7 @@
   // ===== 2. DB HELPERS =====
   var DB = {
     loadChapters: function() {
-      return supa.from('chapters').select('*').order('id').then(function(r) {
+      return supa.from(typeof SITE_ID!=='undefined'&&SITE_ID?SITE_ID+'_chapters':'chapters').select('*').order('id').then(function(r) {
         if (r.error) throw r.error;
         return r.data.map(function(x) {
           return { id: x.id, name: x.name, icon: x.icon, songs: Array.isArray(x.songs) ? x.songs : JSON.parse(x.songs || '[]') };
@@ -40,7 +40,7 @@
       });
     },
     saveChapter: function(ch) {
-      return supa.from('chapters').upsert({
+      return supa.from(typeof SITE_ID!=='undefined'&&SITE_ID?SITE_ID+'_chapters':'chapters').upsert({
         id: ch.id, name: ch.name, icon: ch.icon || '📚', songs: ch.songs || [],
         updated_at: new Date().toISOString()
       }, { onConflict: 'id' }).then(function(r) {
@@ -48,12 +48,12 @@
       });
     },
     getSetting: function(key) {
-      return supa.from('settings').select('value').eq('key', key).single().then(function(r) {
+      return supa.from(typeof SITE_ID!=='undefined'&&SITE_ID?SITE_ID+'_settings':'settings').select('value').eq('key', key).single().then(function(r) {
         return r.data ? r.data.value : null;
       });
     },
     setSetting: function(key, value) {
-      return supa.from('settings').upsert({
+      return supa.from(typeof SITE_ID!=='undefined'&&SITE_ID?SITE_ID+'_settings':'settings').upsert({
         key: key, value: value, updated_at: new Date().toISOString()
       }, { onConflict: 'key' });
     }
@@ -63,7 +63,7 @@
   // ===== 2b. LOAD FROM SUPABASE (for new visitors) =====
   window.loadFromSupabase = function() {
     if (!supaReady) return Promise.resolve(null);
-    return supa.from('chapters').select('*').order('id').then(function(r) {
+    return supa.from(typeof SITE_ID!=='undefined'&&SITE_ID?SITE_ID+'_chapters':'chapters').select('*').order('id').then(function(r) {
       if (r.error) { console.warn('[DB] Load error:', r.error); return null; }
       if (!r.data || r.data.length === 0) return null;
       var hasData = r.data.some(function(x) { return x.songs && (Array.isArray(x.songs) ? x.songs.length > 0 : JSON.parse(x.songs || '[]').length > 0); });
