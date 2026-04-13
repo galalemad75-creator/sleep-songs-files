@@ -353,6 +353,24 @@ async function loadChapters() {
         }
     }
 
+    // ★ NEW: If still no local data, try Supabase first (cross-device sync)
+    if (!localChapters && typeof window.loadFromSupabase === 'function') {
+        console.log('[Load] Trying Supabase...');
+        try {
+            var supaChapters = await window.loadFromSupabase();
+            if (supaChapters && supaChapters.length > 0) {
+                chapters = supaChapters;
+                saveChaptersLocal();
+                renderChapters();
+                updateStats();
+                console.log('[Load] ✅ Loaded from Supabase');
+                return;
+            }
+        } catch(e) {
+            console.warn('[Load] Supabase load failed:', e);
+        }
+    }
+
     // Try loading data.json for chapter structure updates
     let jsonChapters = null;
     try {

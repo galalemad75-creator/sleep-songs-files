@@ -59,6 +59,31 @@
     }
   };
 
+
+  // ===== 2b. LOAD FROM SUPABASE (for new visitors) =====
+  window.loadFromSupabase = function() {
+    if (!supaReady) return Promise.resolve(null);
+    return supa.from('chapters').select('*').order('id').then(function(r) {
+      if (r.error) { console.warn('[DB] Load error:', r.error); return null; }
+      if (!r.data || r.data.length === 0) return null;
+      var hasData = r.data.some(function(x) { return x.songs && (Array.isArray(x.songs) ? x.songs.length > 0 : JSON.parse(x.songs || '[]').length > 0); });
+      if (!hasData) return null;
+      console.log('[DB] Loaded chapters from Supabase');
+      return r.data.map(function(x) {
+        return {
+          id: x.id,
+          name: x.name,
+          icon: x.icon || '📚',
+          songs: Array.isArray(x.songs) ? x.songs : JSON.parse(x.songs || '[]'),
+          isMusic: x.isMusic || false
+        };
+      });
+    }).catch(function(e) {
+      console.warn('[DB] Supabase load failed:', e);
+      return null;
+    });
+  };
+
   // ===== 3. GITHUB UPLOAD =====
   function getGH() {
     return {
