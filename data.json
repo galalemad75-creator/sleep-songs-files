@@ -1,5 +1,5 @@
 {
-  "version": 1,
+  "version": 2,
   "chapters": [
     {
       "id": 1,
@@ -31,19 +31,40 @@
       "id": 3,
       "name": "Gentle Raindrops",
       "icon": "🌧️",
-      "songs": []
+      "songs": [
+        {
+          "id": "song_3_1",
+          "title": "Gentle Raindrops",
+          "audio": "https://raw.githubusercontent.com/galalemad75-creator/sleep-songs-files/main/audio/q2modx_freecompress-Gentle_Raindrops.mp3",
+          "image": "https://raw.githubusercontent.com/galalemad75-creator/sleep-songs-files/main/images/9do4pw_Copilot_20260405_192535.png"
+        }
+      ]
     },
     {
       "id": 4,
       "name": "Starry Night",
       "icon": "⭐",
-      "songs": []
+      "songs": [
+        {
+          "id": "song_4_1",
+          "title": "Starry Night",
+          "audio": "https://raw.githubusercontent.com/galalemad75-creator/sleep-songs-files/main/audio/sndjix_freecompress-Starry_Night.mp3",
+          "image": "https://raw.githubusercontent.com/galalemad75-creator/sleep-songs-files/main/images/bk33zm_Copilot_20260405_193133.png"
+        }
+      ]
     },
     {
       "id": 5,
       "name": "Butterfly Dreams",
       "icon": "🦋",
-      "songs": []
+      "songs": [
+        {
+          "id": "song_5_1",
+          "title": "Butterfly Dreams",
+          "audio": "https://raw.githubusercontent.com/galalemad75-creator/sleep-songs-files/main/audio/rl9itj_freecompress-Butterfly_Dreams.mp3",
+          "image": "https://raw.githubusercontent.com/galalemad75-creator/sleep-songs-files/main/images/uds6y5_Copilot_20260405_193243.png"
+        }
+      ]
     },
     {
       "id": 6,
